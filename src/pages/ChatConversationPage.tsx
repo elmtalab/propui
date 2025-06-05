@@ -78,8 +78,6 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
-
   return (
     <div className="chat-container" style={{ paddingBottom: 80, position: 'relative' }}>
       <Link to="/chat" style={{ display: 'block', marginBottom: 8 }}>
