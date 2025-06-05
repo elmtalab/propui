@@ -96,6 +96,7 @@ const ChatConversationPage: React.FC = () => {
 
   const handleFocus = () => {
     setTimeout(scrollToBottomIfNeeded, 100);
+
   };
 
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
@@ -115,6 +116,7 @@ const ChatConversationPage: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       setTimeout(scrollToBottomIfNeeded, 100);
+
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
