@@ -51,6 +51,12 @@ const ChatConversationPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
+  const scrollToMessage = (msgId: number | undefined) => {
+    if (!msgId) return;
+    const el = document.getElementById(`msg-${msgId}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   const scrollToBottomIfNeeded = () => {
     const container = messagesRef.current;
     if (container) {
@@ -95,6 +101,8 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleFocus = () => {
+    const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
+    scrollToMessage(targetId);
     setTimeout(scrollToBottomIfNeeded, 100);
 
   };
@@ -109,9 +117,21 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+    const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
+    scrollToMessage(targetId);
+  };
+
   useEffect(() => {
     scrollToBottomIfNeeded();
   }, [messages]);
+
+  useEffect(() => {
+    if (replyTo) {
+      scrollToMessage(replyTo.id);
+    }
+  }, [replyTo]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -154,11 +174,16 @@ const ChatConversationPage: React.FC = () => {
           let timer: NodeJS.Timeout;
           return (
             <div
+              id={`msg-${msg.id}`}
               key={msg.id}
               className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
-              onContextMenu={(e) => e.preventDefault()}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setMenuId(msg.id);
+              }}
 
-              onMouseDown={() => {
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
                 timer = setTimeout(() => setMenuId(msg.id), 600);
               }}
               onMouseUp={() => clearTimeout(timer)}
@@ -245,7 +270,7 @@ const ChatConversationPage: React.FC = () => {
           <input
             ref={inputRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
