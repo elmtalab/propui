@@ -95,7 +95,7 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleFocus = () => {
-  setTimeout(scrollToBottomIfNeeded, 100);
+    setTimeout(scrollToBottomIfNeeded, 100);
 
   };
 
@@ -115,7 +115,7 @@ const ChatConversationPage: React.FC = () => {
 
   useEffect(() => {
     const handleResize = () => {
-     setTimeout(scrollToBottomIfNeeded, 100);
+      setTimeout(scrollToBottomIfNeeded, 100);
 
     };
     window.addEventListener('resize', handleResize);
@@ -126,7 +126,13 @@ const ChatConversationPage: React.FC = () => {
   return (
     <div
       className="chat-container"
-      style={{ paddingBottom: 80, position: 'relative' }}
+      style={{
+        paddingBottom: 80,
+        position: 'relative',
+        height: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
       onClick={() => setMenuId(null)}
     >
       <div className="chat-header">
