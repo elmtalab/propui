@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
+import CodeIcon from '@mui/icons-material/Code';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -22,21 +28,23 @@ const avatars: Avatar[] = [
 ];
 
 interface Message {
- id: number;
+  id: number;
   from: string;
   text: string;
+  timestamp: string;
   replyTo?: number;
 }
 
+const nowIso = new Date().toISOString();
 const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?" }],
-  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.' }],
-  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.' }],
-  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.' }],
-  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.' }],
-  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.' }],
-  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?' }],
-  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting." }],
+  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", timestamp: nowIso }],
+  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', timestamp: nowIso }],
+  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', timestamp: nowIso }],
+  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', timestamp: nowIso }],
+  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', timestamp: nowIso }],
+  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', timestamp: nowIso }],
+  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', timestamp: nowIso }],
+  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", timestamp: nowIso }],
 
 };
 
@@ -52,6 +60,9 @@ const ChatConversationPage: React.FC = () => {
   const [swipeId, setSwipeId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const conversationStartRef = useRef<string>(new Date().toISOString());
+  const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
+  const [jsonOpen, setJsonOpen] = useState(false);
 
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
@@ -86,14 +97,18 @@ const ChatConversationPage: React.FC = () => {
     if (!text.trim()) return;
     setMessages((prev) => {
       if (editingId !== null) {
-        return prev.map((m) =>
-          m.id === editingId ? { ...m, text } : m
-        );
+        return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
       }
       const newId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       return [
         ...prev,
-        { id: newId, from: selectedAvatar.id, text, replyTo: replyTo?.id },
+        {
+          id: newId,
+          from: selectedAvatar.id,
+          text,
+          timestamp: new Date().toISOString(),
+          replyTo: replyTo?.id,
+        },
       ];
     });
     setText('');
@@ -117,6 +132,65 @@ const ChatConversationPage: React.FC = () => {
     setText('');
     setEditingId(null);
     setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const generateJSON = () => {
+    const msgs = messages.map((m, idx) => {
+      const prev = messages[idx - 1];
+      const relative = prev
+        ? Math.floor(
+            (new Date(m.timestamp).getTime() -
+              new Date(prev.timestamp).getTime()) /
+              1000
+          )
+        : 0;
+      return {
+        message_id: `m-${m.id}`,
+        sender_id: m.from,
+        sender_name: m.from,
+        message_content: m.text,
+        message_type: 'text',
+        timestamp: m.timestamp,
+        relative_time: relative,
+        status: 'pending',
+        metadata: {
+          language: 'en',
+        },
+      };
+    });
+
+    return {
+      system_metadata: {
+        version: '1.0.1',
+        generated_at: new Date().toISOString(),
+        timezone: 'UTC',
+        description:
+          'Ledger of AI-only outbound interactions inside Telegram groups',
+      },
+      groups: [
+        {
+          group_id: id,
+          group_name: id,
+          privacy_level: 'public',
+          created_at: new Date().toISOString(),
+          created_by: 123456789,
+          group_description: '',
+          members: [],
+          conversations: [
+            {
+              conversation_id: conversationIdRef.current,
+              start_time: conversationStartRef.current,
+              initiated_by: selectedAvatar.id,
+              topic: '',
+              conversation_metadata: { active: true, tags: [] },
+              messages: msgs,
+            },
+          ],
+        },
+      ],
+      ai_users: [],
+      audit_log: [],
+    };
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,6 +369,15 @@ const ChatConversationPage: React.FC = () => {
 
         <IconButton
           onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setJsonOpen(true)}
+          color="primary"
+          aria-label="show-json"
+        >
+          <CodeIcon />
+        </IconButton>
+
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleSend}
           color="primary"
           aria-label="send"
@@ -302,6 +385,17 @@ const ChatConversationPage: React.FC = () => {
           <SendIcon />
         </IconButton>
       </div>
+      <Dialog open={jsonOpen} onClose={() => setJsonOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>Generated JSON</DialogTitle>
+        <DialogContent>
+          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {JSON.stringify(generateJSON(), null, 2)}
+          </pre>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setJsonOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
