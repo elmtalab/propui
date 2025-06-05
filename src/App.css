@@ -65,7 +65,7 @@
   padding: 8px 12px;
   border-radius: 12px;
   color: #fff;
-  position: relative;
+ position: relative;
 }
 
 .reply-text {
@@ -75,6 +75,7 @@
   padding: 2px 4px;
   border-radius: 4px;
   margin-bottom: 4px;
+
 }
 
 .message-input-container {
@@ -131,6 +132,7 @@
   border-left: 4px solid #ccc;
   margin-bottom: 4px;
 }
+
 
 @keyframes App-logo-spin {
   from {

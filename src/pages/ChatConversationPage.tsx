@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+
 import { Link, useParams } from 'react-router-dom';
 
 interface Avatar {
@@ -19,7 +20,7 @@ const avatars: Avatar[] = [
 ];
 
 interface Message {
-  id: number;
+ id: number;
   from: string;
   text: string;
   replyTo?: number;
@@ -34,6 +35,7 @@ const initialMessages: Record<string, Message[]> = {
   burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.' }],
   abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?' }],
   ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting." }],
+
 };
 
 const ChatConversationPage: React.FC = () => {
@@ -42,7 +44,7 @@ const ChatConversationPage: React.FC = () => {
   const [text, setText] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
   const [showAvatars, setShowAvatars] = useState(false);
-  const [replyTo, setReplyTo] = useState<Message | null>(null);
+ const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,10 +72,13 @@ const ChatConversationPage: React.FC = () => {
 
   const handleSwipeReply = (msg: Message) => {
     setReplyTo(msg);
+
     setText('');
     setEditingId(null);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
+
+  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
 
   return (
     <div className="chat-container" style={{ paddingBottom: 80, position: 'relative' }}>
@@ -81,7 +86,7 @@ const ChatConversationPage: React.FC = () => {
         Back
       </Link>
       <div className="chat-messages">
-        {messages.map((msg) => {
+       {messages.map((msg) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
@@ -120,6 +125,7 @@ const ChatConversationPage: React.FC = () => {
                     Edit
                   </button>
                 </div>
+
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
             </div>
@@ -150,7 +156,7 @@ const ChatConversationPage: React.FC = () => {
             </div>
           )}
         </div>
-        <div style={{ flex: 1 }}>
+       <div style={{ flex: 1 }}>
           {replyTo && (
             <div className="reply-preview">
               Replying to: {replyTo.text}
@@ -166,6 +172,7 @@ const ChatConversationPage: React.FC = () => {
             placeholder="Type here..."
           />
         </div>
+
         <button onClick={handleSend}>Send</button>
       </div>
     </div>
