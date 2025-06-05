@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChatList } from 'react-chat-elements';
@@ -6,7 +6,7 @@ import 'react-chat-elements/dist/main.css';
 
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
-  const chats = [
+  const executedChats = [
     {
       id: 'kursat',
 
@@ -90,11 +90,53 @@ const ChatInboxPage: React.FC = () => {
     },
   ];
 
+  const scheduledChats = executedChats.slice(0, 3);
+  const draftChats = executedChats.slice(3);
+
+  const [activeTab, setActiveTab] = useState<'executed' | 'scheduled' | 'draft'>('executed');
+
+  const getChats = () => {
+    switch (activeTab) {
+      case 'scheduled':
+        return scheduledChats;
+      case 'draft':
+        return draftChats;
+      default:
+        return executedChats;
+    }
+  };
+
   return (
     <div className="chat-container">
-     <ChatList
+      <div className="inbox-header">
+        <h2>Chats</h2>
+        <span className="settings-icon" role="img" aria-label="settings">
+          ⚙️
+        </span>
+      </div>
+      <div className="tabs">
+        <button
+          className={activeTab === 'executed' ? 'active' : ''}
+          onClick={() => setActiveTab('executed')}
+        >
+          Executed
+        </button>
+        <button
+          className={activeTab === 'scheduled' ? 'active' : ''}
+          onClick={() => setActiveTab('scheduled')}
+        >
+          Scheduled
+        </button>
+        <button
+          className={activeTab === 'draft' ? 'active' : ''}
+          onClick={() => setActiveTab('draft')}
+        >
+          Draft
+        </button>
+      </div>
+      <ChatList
         className="chat-list"
-        dataSource={chats}
+        dataSource={getChats()}
         onClick={(item: any) => {
           navigate(`/chat/${(item as any).id}`);
         }}
