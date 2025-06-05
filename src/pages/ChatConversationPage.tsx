@@ -62,6 +62,7 @@ const ChatConversationPage: React.FC = () => {
     setMenuId(null);
   };
 
+
   const handleSend = () => {
     if (!text.trim()) return;
     setMessages((prev) => {
@@ -100,6 +101,7 @@ const ChatConversationPage: React.FC = () => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+
   return (
     <div
       className="chat-container"
@@ -122,6 +124,7 @@ const ChatConversationPage: React.FC = () => {
               key={msg.id}
               className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
               onContextMenu={(e) => e.preventDefault()}
+
               onMouseDown={() => {
                 timer = setTimeout(() => setMenuId(msg.id), 600);
               }}
@@ -163,6 +166,7 @@ const ChatConversationPage: React.FC = () => {
                     <button onClick={() => handleSwipeReply(msg)}>Reply</button>
                     <button onClick={() => handleCopy(msg.text)}>Copy</button>
                     <button onClick={() => handleDelete(msg.id)}>Delete</button>
+
                   </div>
                 )}
 
@@ -216,6 +220,7 @@ const ChatConversationPage: React.FC = () => {
                 handleSend();
               }
             }}
+
             onFocus={handleFocus}
             placeholder="Type here..."
           />
