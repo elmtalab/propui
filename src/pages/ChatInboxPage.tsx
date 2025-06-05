@@ -67,12 +67,14 @@ const ChatInboxPage: React.FC = () => {
       subtitle: "Let's join the daily meeting.",
       date: new Date(),
       unread: 1,
+
     },
   ];
 
   return (
     <div className="chat-container">
       <ChatList className="chat-list" dataSource={chats} />
+
     </div>
   );
 };
