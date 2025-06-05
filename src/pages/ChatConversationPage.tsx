@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import IconButton from '@mui/material/IconButton';
+import SendIcon from '@mui/icons-material/Send';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -261,7 +263,15 @@ const ChatConversationPage: React.FC = () => {
        <div style={{ flex: 1 }}>
           {replyTo && (
             <div className="reply-preview">
-              Replying to: {replyTo.text}
+              <span>Replying to: {replyTo.text}</span>
+              <span
+                className="cancel-reply"
+                role="button"
+                aria-label="cancel reply"
+                onClick={() => setReplyTo(null)}
+              >
+                ×
+              </span>
             </div>
           )}
           {editingId !== null && (
@@ -283,9 +293,14 @@ const ChatConversationPage: React.FC = () => {
           />
         </div>
 
-        <button onMouseDown={(e) => e.preventDefault()} onClick={handleSend}>
-          Send
-        </button>
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleSend}
+          color="primary"
+          aria-label="send"
+        >
+          <SendIcon />
+        </IconButton>
       </div>
     </div>
   );
