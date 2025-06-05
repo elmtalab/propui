@@ -153,16 +153,6 @@ const ChatInboxPage: React.FC = () => {
     };
   }, []);
 
-  const getChats = () => {
-    switch (tabIndex) {
-      case 1:
-        return scheduledChats;
-      case 2:
-        return draftChats;
-      default:
-        return executedChats;
-    }
-  };
 
   return (
     <div className="chat-container" style={{ height: viewportHeight }}>
