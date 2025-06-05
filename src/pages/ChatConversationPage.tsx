@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -46,7 +46,10 @@ const ChatConversationPage: React.FC = () => {
   const [showAvatars, setShowAvatars] = useState(false);
  const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [menuId, setMenuId] = useState<number | null>(null);
+  const [swipeId, setSwipeId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -68,6 +71,10 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const handleFocus = () => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
 
   const handleSwipeReply = (msg: Message) => {
@@ -78,33 +85,49 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   return (
-    <div className="chat-container" style={{ paddingBottom: 80, position: 'relative' }}>
+    <div
+      className="chat-container"
+      style={{ paddingBottom: 80, position: 'relative' }}
+      onClick={() => setMenuId(null)}
+    >
       <Link to="/chat" style={{ display: 'block', marginBottom: 8 }}>
         Back
       </Link>
       <div className="chat-messages">
-       {messages.map((msg) => {
+        {messages.map((msg) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           let startX = 0;
           let startY = 0;
+          let timer: NodeJS.Timeout;
           return (
             <div
               key={msg.id}
-              className={`message-item ${me ? 'me' : ''}`}
+              className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
+              onMouseDown={() => {
+                timer = setTimeout(() => setMenuId(msg.id), 600);
+              }}
+              onMouseUp={() => clearTimeout(timer)}
+              onMouseLeave={() => clearTimeout(timer)}
               onTouchStart={(e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
+                timer = setTimeout(() => setMenuId(msg.id), 600);
               }}
               onTouchEnd={(e) => {
+                clearTimeout(timer);
                 const dx = e.changedTouches[0].clientX - startX;
                 const dy = e.changedTouches[0].clientY - startY;
                 if (dx > 50 && Math.abs(dy) < 30) {
                   handleSwipeReply(msg);
+                  setSwipeId(msg.id);
+                  setTimeout(() => setSwipeId(null), 300);
                 }
               }}
             >
@@ -112,25 +135,36 @@ const ChatConversationPage: React.FC = () => {
               <div className="message-bubble" style={{ backgroundColor: av.color }}>
                 {reply && <div className="reply-text">{reply.text}</div>}
                 {msg.text}
-                <div>
-                  <button
-                    style={{ fontSize: 10 }}
-                    onClick={() => {
-                      setText(msg.text);
-                      setEditingId(msg.id);
-                      setReplyTo(null);
-                      setTimeout(() => inputRef.current?.focus(), 0);
-                    }}
-                  >
-                    Edit
-                  </button>
-                </div>
+                {menuId === msg.id && (
+                  <div className="message-menu">
+                    <button
+                      onClick={() => {
+                        setMenuId(null);
+                        setText(msg.text);
+                        setEditingId(msg.id);
+                        setReplyTo(null);
+                        setTimeout(() => inputRef.current?.focus(), 0);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleSwipeReply(msg);
+                        setMenuId(null);
+                      }}
+                    >
+                      Reply
+                    </button>
+                  </div>
+                )}
 
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
             </div>
           );
         })}
+        <div ref={endRef} />
       </div>
       <div className="message-input-container">
         <div style={{ position: 'relative' }}>
@@ -169,6 +203,7 @@ const ChatConversationPage: React.FC = () => {
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onFocus={handleFocus}
             placeholder="Type here..."
           />
         </div>
