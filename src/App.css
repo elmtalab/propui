@@ -32,11 +32,15 @@
   max-width: 480px;
   margin: 0 auto;
   padding: 12px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-messages {
-  height: calc(100vh - 160px);
+  flex: 1;
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .message-item {
@@ -161,6 +165,34 @@
   padding: 4px;
   border-left: 4px solid #ccc;
   margin-bottom: 4px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding-bottom: 8px;
+  z-index: 2;
+}
+
+.back-icon {
+  text-decoration: none;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.header-name {
+  font-weight: bold;
 }
 
 
