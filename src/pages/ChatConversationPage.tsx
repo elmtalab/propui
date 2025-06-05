@@ -84,7 +84,9 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleFocus = () => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
@@ -100,6 +102,16 @@ const ChatConversationPage: React.FC = () => {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setTimeout(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
 
   return (
