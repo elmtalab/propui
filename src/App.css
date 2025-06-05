@@ -177,6 +177,7 @@
   background: #fff;
   padding-bottom: 8px;
   z-index: 2;
+
 }
 
 .back-icon {
@@ -194,6 +195,7 @@
 .header-name {
   font-weight: bold;
 }
+
 
 
 @keyframes App-logo-spin {
