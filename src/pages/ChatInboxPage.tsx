@@ -1,12 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChatList } from 'react-chat-elements';
 import 'react-chat-elements/dist/main.css';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import IconButton from '@mui/material/IconButton';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`chat-tabpanel-${index}`}
+      aria-labelledby={`chat-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `chat-tab-${index}`,
+    'aria-controls': `chat-tabpanel-${index}`,
+  };
+}
 
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
-  const chats = [
+  const executedChats = [
     {
       id: 'kursat',
 
@@ -90,16 +124,90 @@ const ChatInboxPage: React.FC = () => {
     },
   ];
 
-  return (
-    <div className="chat-container">
-     <ChatList
-        className="chat-list"
-        dataSource={chats}
-        onClick={(item: any) => {
-          navigate(`/chat/${(item as any).id}`);
-        }}
-      />
+  const scheduledChats = executedChats.slice(0, 3);
+  const draftChats = executedChats.slice(3);
 
+  const [tabIndex, setTabIndex] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState<number>(
+    typeof window !== 'undefined' ? window.innerHeight : 0
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+    const viewport = (window as any).visualViewport;
+    if (viewport) {
+      viewport.addEventListener('resize', handleResize);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+    return () => {
+      if (viewport) {
+        viewport.removeEventListener('resize', handleResize);
+      } else {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
+  }, []);
+
+  const getChats = () => {
+    switch (tabIndex) {
+      case 1:
+        return scheduledChats;
+      case 2:
+        return draftChats;
+      default:
+        return executedChats;
+    }
+  };
+
+  return (
+    <div className="chat-container" style={{ height: viewportHeight }}>
+      <div className="inbox-header">
+        <h2>Chats</h2>
+        <IconButton size="large" className="settings-icon">
+          <SettingsIcon />
+        </IconButton>
+      </div>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={tabIndex}
+          onChange={(_, newValue) => setTabIndex(newValue)}
+          aria-label="chat tabs"
+        >
+          <Tab label="Executed" {...a11yProps(0)} />
+          <Tab label="Scheduled" {...a11yProps(1)} />
+          <Tab label="Draft" {...a11yProps(2)} />
+        </Tabs>
+      </Box>
+      <TabPanel value={tabIndex} index={0}>
+        <ChatList
+          className="chat-list"
+          dataSource={executedChats}
+          onClick={(item: any) => {
+            navigate(`/chat/${(item as any).id}`);
+          }}
+        />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={1}>
+        <ChatList
+          className="chat-list"
+          dataSource={scheduledChats}
+          onClick={(item: any) => {
+            navigate(`/chat/${(item as any).id}`);
+          }}
+        />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={2}>
+        <ChatList
+          className="chat-list"
+          dataSource={draftChats}
+          onClick={(item: any) => {
+            navigate(`/chat/${(item as any).id}`);
+          }}
+        />
+      </TabPanel>
     </div>
   );
 };
