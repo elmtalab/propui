@@ -51,6 +51,18 @@ const ChatConversationPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  const handleDelete = (id: number) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const handleCopy = (textToCopy: string) => {
+    navigator.clipboard?.writeText(textToCopy).catch(() => {
+      /* ignore */
+    });
+    setMenuId(null);
+  };
+
+
   const handleSend = () => {
     if (!text.trim()) return;
     setMessages((prev) => {
@@ -111,6 +123,8 @@ const ChatConversationPage: React.FC = () => {
             <div
               key={msg.id}
               className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
+              onContextMenu={(e) => e.preventDefault()}
+
               onMouseDown={() => {
                 timer = setTimeout(() => setMenuId(msg.id), 600);
               }}
@@ -149,14 +163,10 @@ const ChatConversationPage: React.FC = () => {
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => {
-                        handleSwipeReply(msg);
-                        setMenuId(null);
-                      }}
-                    >
-                      Reply
-                    </button>
+                    <button onClick={() => handleSwipeReply(msg)}>Reply</button>
+                    <button onClick={() => handleCopy(msg.text)}>Copy</button>
+                    <button onClick={() => handleDelete(msg.id)}>Delete</button>
+
                   </div>
                 )}
 
@@ -204,6 +214,13 @@ const ChatConversationPage: React.FC = () => {
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+
             onFocus={handleFocus}
             placeholder="Type here..."
           />
