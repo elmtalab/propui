@@ -89,6 +89,7 @@ const ChatConversationPage: React.FC = () => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+
   return (
     <div
       className="chat-container"
