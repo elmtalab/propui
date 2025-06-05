@@ -49,7 +49,18 @@ const ChatConversationPage: React.FC = () => {
   const [menuId, setMenuId] = useState<number | null>(null);
   const [swipeId, setSwipeId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottomIfNeeded = () => {
+    const container = messagesRef.current;
+    if (container) {
+      if (container.scrollHeight - container.clientHeight > 10) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      } else {
+        container.scrollTop = 0;
+      }
+    }
+  };
 
   const handleDelete = (id: number) => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
@@ -80,13 +91,12 @@ const ChatConversationPage: React.FC = () => {
     setText('');
     setEditingId(null);
     setReplyTo(null);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    scrollToBottomIfNeeded();
   };
 
   const handleFocus = () => {
-    setTimeout(() => {
-      endRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+  setTimeout(scrollToBottomIfNeeded, 100);
+
   };
 
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
@@ -100,14 +110,13 @@ const ChatConversationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottomIfNeeded();
   }, [messages]);
 
   useEffect(() => {
     const handleResize = () => {
-      setTimeout(() => {
-        endRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+     setTimeout(scrollToBottomIfNeeded, 100);
+
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -120,10 +129,16 @@ const ChatConversationPage: React.FC = () => {
       style={{ paddingBottom: 80, position: 'relative' }}
       onClick={() => setMenuId(null)}
     >
-      <Link to="/chat" style={{ display: 'block', marginBottom: 8 }}>
-        Back
-      </Link>
-      <div className="chat-messages">
+      <div className="chat-header">
+        <Link to="/chat" className="back-icon">←</Link>
+        <img
+          src={getAvatar(id ?? '').avatar}
+          className="header-avatar"
+          alt={id}
+        />
+        <span className="header-name">{id}</span>
+      </div>
+      <div className="chat-messages" ref={messagesRef}>
         {messages.map((msg) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
@@ -187,7 +202,6 @@ const ChatConversationPage: React.FC = () => {
             </div>
           );
         })}
-        <div ref={endRef} />
       </div>
       <div className="message-input-container">
         <div style={{ position: 'relative' }}>
@@ -238,7 +252,9 @@ const ChatConversationPage: React.FC = () => {
           />
         </div>
 
-        <button onClick={handleSend}>Send</button>
+        <button onMouseDown={(e) => e.preventDefault()} onClick={handleSend}>
+          Send
+        </button>
       </div>
     </div>
   );
