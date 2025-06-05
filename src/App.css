@@ -68,6 +68,24 @@
  position: relative;
 }
 
+.message-menu {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+.message-item.swipe {
+  transform: translateX(40px);
+  transition: transform 0.2s;
+}
+
 .reply-text {
   font-size: 12px;
   background: rgba(255, 255, 255, 0.6);
