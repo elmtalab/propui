@@ -128,8 +128,12 @@
 
 .message-input-container input {
   flex: 1;
-  padding: 8px;
+  padding: 8px 12px;
   margin: 0 8px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 14px;
+  background: #f9f9f9;
 }
 
 .selected-avatar {
@@ -165,6 +169,15 @@
   padding: 4px;
   border-left: 4px solid #ccc;
   margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cancel-reply {
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .chat-header {
