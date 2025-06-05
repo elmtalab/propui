@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 import { ChatList } from 'react-chat-elements';
@@ -131,6 +132,7 @@ const ChatInboxPage: React.FC = () => {
   const [viewportHeight, setViewportHeight] = useState<number>(
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
+
 
   useEffect(() => {
     const handleResize = () => {
