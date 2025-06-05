@@ -34,6 +34,86 @@
   padding: 12px;
 }
 
+.chat-messages {
+  height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+.message-item {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.message-item.me {
+  justify-content: flex-end;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.message-item.me .message-avatar {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.message-input-container {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 8px;
+  background: #fff;
+  border-top: 1px solid #ccc;
+}
+
+.message-input-container input {
+  flex: 1;
+  padding: 8px;
+  margin: 0 8px;
+}
+
+.selected-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatar-list {
+  position: absolute;
+  bottom: 48px;
+  left: 0;
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.avatar-list img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

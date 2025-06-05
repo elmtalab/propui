@@ -1,119 +1,105 @@
-import React, { useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { MessageList, Input } from 'react-chat-elements';
-import 'react-chat-elements/dist/main.css';
+import React, { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
-interface MessagesMap {
-  [key: string]: any[];
+interface Avatar {
+  id: string;
+  avatar: string;
+  color: string;
 }
 
-const initialMessages: MessagesMap = {
-  kursat: [
-    {
-      position: 'left',
-      type: 'text',
-      text: "Why don't we go to the mall this weekend ?",
-      date: new Date(),
-    },
-  ],
-  emre: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'Send me our photos.',
-      date: new Date(),
-    },
-  ],
-  abdurrahim: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'Hey ! Send me the animation video please.',
-      date: new Date(),
-    },
-  ],
-  esra: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'I need a random voice.',
-      date: new Date(),
-    },
-  ],
-  bensu: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'Send your location.',
-      date: new Date(),
-    },
-  ],
-  burhan: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'Recommend me some songs.',
-      date: new Date(),
-    },
-  ],
-  abdurrahman: [
-    {
-      position: 'left',
-      type: 'text',
-      text: 'Where is the presentation file ?',
-      date: new Date(),
-    },
-  ],
-  ahmet: [
-    {
-      position: 'left',
-      type: 'text',
-      text: "Let's join the daily meeting.",
-      date: new Date(),
-    },
-  ],
+const avatars: Avatar[] = [
+  { id: 'kursat', avatar: 'https://avatars.githubusercontent.com/u/80540635?v=4', color: '#ffadad' },
+  { id: 'emre', avatar: 'https://avatars.githubusercontent.com/u/41473129?v=4', color: '#ffd6a5' },
+  { id: 'abdurrahim', avatar: 'https://avatars.githubusercontent.com/u/90318672?v=4', color: '#fdffb6' },
+  { id: 'esra', avatar: 'https://avatars.githubusercontent.com/u/53093667?s=100&v=4', color: '#caffbf' },
+  { id: 'bensu', avatar: 'https://avatars.githubusercontent.com/u/50342489?s=100&v=4', color: '#9bf6ff' },
+  { id: 'burhan', avatar: 'https://avatars.githubusercontent.com/u/80754124?s=100&v=4', color: '#a0c4ff' },
+  { id: 'abdurrahman', avatar: 'https://avatars.githubusercontent.com/u/15075759?s=100&v=4', color: '#bdb2ff' },
+  { id: 'ahmet', avatar: 'https://avatars.githubusercontent.com/u/57258793?s=100&v=4', color: '#ffc6ff' },
+];
+
+interface Message {
+  from: string;
+  text: string;
+}
+
+const initialMessages: Record<string, Message[]> = {
+  kursat: [{ from: 'kursat', text: "Why don't we go to the mall this weekend ?" }],
+  emre: [{ from: 'emre', text: 'Send me our photos.' }],
+  abdurrahim: [{ from: 'abdurrahim', text: 'Hey ! Send me the animation video please.' }],
+  esra: [{ from: 'esra', text: 'I need a random voice.' }],
+  bensu: [{ from: 'bensu', text: 'Send your location.' }],
+  burhan: [{ from: 'burhan', text: 'Recommend me some songs.' }],
+  abdurrahman: [{ from: 'abdurrahman', text: 'Where is the presentation file ?' }],
+  ahmet: [{ from: 'ahmet', text: "Let's join the daily meeting." }],
 };
 
 const ChatConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<any[]>(
-    initialMessages[id ?? ''] || []
-  );
+  const [messages, setMessages] = useState<Message[]>(initialMessages[id ?? ''] || []);
   const [text, setText] = useState('');
-  const listRef = useRef<HTMLDivElement>(null);
+  const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
+  const [showAvatars, setShowAvatars] = useState(false);
 
   const handleSend = () => {
     if (!text.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        position: 'right',
-        type: 'text',
-        text,
-        date: new Date(),
-      },
-    ]);
+    setMessages((prev) => [...prev, { from: selectedAvatar.id, text }]);
     setText('');
   };
 
+  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
+
   return (
-    <div className="chat-container">
+    <div className="chat-container" style={{ paddingBottom: 80, position: 'relative' }}>
       <Link to="/chat" style={{ display: 'block', marginBottom: 8 }}>
         Back
       </Link>
-      <MessageList
-        className="message-list"
-        referance={listRef}
-        lockable={true}
-        toBottomHeight={"100%"}
-        dataSource={messages}
-      />
-      <Input
-        placeholder="Type here..."
-        value={text}
-        onChange={(e: any) => setText(e.target.value)}
-        rightButtons={<button onClick={handleSend}>Send</button>}
-      />
+      <div className="chat-messages">
+        {messages.map((msg, idx) => {
+          const av = getAvatar(msg.from);
+          const me = msg.from === selectedAvatar.id;
+          return (
+            <div key={idx} className={`message-item ${me ? 'me' : ''}`}>
+              {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
+              <div className="message-bubble" style={{ backgroundColor: av.color }}>
+                {msg.text}
+              </div>
+              {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
+            </div>
+          );
+        })}
+      </div>
+      <div className="message-input-container">
+        <div style={{ position: 'relative' }}>
+          <img
+            src={selectedAvatar.avatar}
+            className="selected-avatar"
+            alt="selected avatar"
+            onClick={() => setShowAvatars((s) => !s)}
+          />
+          {showAvatars && (
+            <div className="avatar-list">
+              {avatars.map((a) => (
+                <img
+                  key={a.id}
+                  src={a.avatar}
+                  alt={a.id}
+                  onClick={() => {
+                    setSelectedAvatar(a);
+                    setShowAvatars(false);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type here..."
+        />
+        <button onClick={handleSend}>Send</button>
+      </div>
     </div>
   );
 };
