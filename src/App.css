@@ -251,6 +251,7 @@
   border: 1px solid #ccc;
   padding: 8px;
   border-radius: 4px;
+
 }
 
 .generate-btn {
@@ -259,6 +260,7 @@
   padding: 8px;
   border-radius: 4px;
   font-weight: bold;
+
 }
 
 .inbox-header {
