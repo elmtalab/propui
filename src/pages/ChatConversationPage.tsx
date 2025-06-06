@@ -31,20 +31,22 @@ interface Message {
   id: number;
   from: string;
   text: string;
-  timestamp: string;
+  delay: number;
+
   replyTo?: number;
 }
 
 const nowIso = new Date().toISOString();
 const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", timestamp: nowIso }],
-  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', timestamp: nowIso }],
-  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', timestamp: nowIso }],
-  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', timestamp: nowIso }],
-  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', timestamp: nowIso }],
-  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', timestamp: nowIso }],
-  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', timestamp: nowIso }],
-  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", timestamp: nowIso }],
+  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0 }],
+  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0 }],
+  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0 }],
+  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', delay: 0 }],
+  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', delay: 0 }],
+  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0 }],
+  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0 }],
+  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0 }],
+
 
 };
 
@@ -58,9 +60,18 @@ const ChatConversationPage: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [menuId, setMenuId] = useState<number | null>(null);
   const [swipeId, setSwipeId] = useState<number | null>(null);
+  const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const conversationStartRef = useRef<string>(new Date().toISOString());
+  const initialStart = new Date();
+  const [startDate, setStartDate] = useState(
+    initialStart.toISOString().slice(0, 10)
+  );
+  const [startTime, setStartTime] = useState(
+    initialStart.toISOString().slice(11, 16)
+  );
+  const conversationStartRef = useRef<string>(initialStart.toISOString());
+
   const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
   const [jsonOpen, setJsonOpen] = useState(false);
 
@@ -106,7 +117,7 @@ const ChatConversationPage: React.FC = () => {
           id: newId,
           from: selectedAvatar.id,
           text,
-          timestamp: new Date().toISOString(),
+          delay: 0,
           replyTo: replyTo?.id,
         },
       ];
@@ -134,23 +145,41 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const handleAddDelay = (id: number, minutes: number) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
+    );
+    setDelayMenuId(null);
+  };
+
+  const computeTimestamp = (index: number) => {
+    let total = 0;
+    for (let i = 1; i <= index; i++) {
+      total += messages[i].delay;
+    }
+    return new Date(
+      new Date(conversationStartRef.current).getTime() + total * 60000
+    ).toISOString();
+  };
+
   const generateJSON = () => {
+    let cumulative = 0;
+    const start = new Date(conversationStartRef.current).getTime();
     const msgs = messages.map((m, idx) => {
-      const prev = messages[idx - 1];
-      const relative = prev
-        ? Math.floor(
-            (new Date(m.timestamp).getTime() -
-              new Date(prev.timestamp).getTime()) /
-              1000
-          )
-        : 0;
+      if (idx > 0) {
+        cumulative += m.delay;
+      }
+      const timestamp = new Date(start + cumulative * 60000).toISOString();
+      const relative = idx === 0 ? 0 : m.delay * 60;
+
       return {
         message_id: `m-${m.id}`,
         sender_id: m.from,
         sender_name: m.from,
         message_content: m.text,
         message_type: 'text',
-        timestamp: m.timestamp,
+        timestamp,
+
         relative_time: relative,
         status: 'pending',
         metadata: {
@@ -158,6 +187,15 @@ const ChatConversationPage: React.FC = () => {
         },
       };
     });
+
+    const members = Array.from(new Set(messages.map((m) => m.from))).map((u) => ({
+      telegram_user_id: u,
+      telegram_user_name: u,
+      role: 'member',
+      status: 'active',
+      joined_at: conversationStartRef.current,
+    }));
+
 
     return {
       system_metadata: {
@@ -175,7 +213,8 @@ const ChatConversationPage: React.FC = () => {
           created_at: new Date().toISOString(),
           created_by: 123456789,
           group_description: '',
-          members: [],
+          members,
+
           conversations: [
             {
               conversation_id: conversationIdRef.current,
@@ -210,6 +249,11 @@ const ChatConversationPage: React.FC = () => {
   }, [replyTo]);
 
   useEffect(() => {
+    const iso = new Date(`${startDate}T${startTime}:00Z`).toISOString();
+    conversationStartRef.current = iso;
+  }, [startDate, startTime]);
+
+  useEffect(() => {
     const handleResize = () => {
       setTimeout(scrollToBottomIfNeeded, 100);
 
@@ -240,8 +284,12 @@ const ChatConversationPage: React.FC = () => {
         />
         <span className="header-name">{id}</span>
       </div>
+      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+      </div>
       <div className="chat-messages" ref={messagesRef}>
-        {messages.map((msg) => {
+        {messages.map((msg, idx) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
@@ -280,10 +328,37 @@ const ChatConversationPage: React.FC = () => {
                 }
               }}
             >
+              {idx > 0 && (
+                <>
+                  <button
+                    className="delay-btn"
+                    onClick={() =>
+                      setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
+                    }
+                  >
+                    +
+                  </button>
+                  {delayMenuId === msg.id && (
+                    <div className="message-menu">
+                      {[1, 2, 3, 5].map((m) => (
+                        <button
+                          key={m}
+                          onClick={() => handleAddDelay(msg.id, m)}
+                        >
+                          +{m}m
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
               {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               <div className="message-bubble" style={{ backgroundColor: av.color }}>
                 {reply && <div className="reply-text">{reply.text}</div>}
                 {msg.text}
+                <div className="message-time">
+                  {new Date(computeTimestamp(idx)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
                 {menuId === msg.id && (
                   <div className="message-menu">
                     <button
@@ -300,10 +375,8 @@ const ChatConversationPage: React.FC = () => {
                     <button onClick={() => handleSwipeReply(msg)}>Reply</button>
                     <button onClick={() => handleCopy(msg.text)}>Copy</button>
                     <button onClick={() => handleDelete(msg.id)}>Delete</button>
-
                   </div>
                 )}
-
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
             </div>
