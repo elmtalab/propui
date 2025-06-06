@@ -32,6 +32,7 @@ interface Message {
   from: string;
   text: string;
   delay: number;
+
   replyTo?: number;
 }
 
@@ -45,6 +46,7 @@ const initialMessages: Record<string, Message[]> = {
   burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0 }],
   abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0 }],
   ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0 }],
+
 
 };
 
@@ -69,6 +71,7 @@ const ChatConversationPage: React.FC = () => {
     initialStart.toISOString().slice(11, 16)
   );
   const conversationStartRef = useRef<string>(initialStart.toISOString());
+
   const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
   const [jsonOpen, setJsonOpen] = useState(false);
 
@@ -168,6 +171,7 @@ const ChatConversationPage: React.FC = () => {
       }
       const timestamp = new Date(start + cumulative * 60000).toISOString();
       const relative = idx === 0 ? 0 : m.delay * 60;
+
       return {
         message_id: `m-${m.id}`,
         sender_id: m.from,
@@ -175,6 +179,7 @@ const ChatConversationPage: React.FC = () => {
         message_content: m.text,
         message_type: 'text',
         timestamp,
+
         relative_time: relative,
         status: 'pending',
         metadata: {
@@ -190,6 +195,7 @@ const ChatConversationPage: React.FC = () => {
       status: 'active',
       joined_at: conversationStartRef.current,
     }));
+
 
     return {
       system_metadata: {
@@ -208,6 +214,7 @@ const ChatConversationPage: React.FC = () => {
           created_by: 123456789,
           group_description: '',
           members,
+
           conversations: [
             {
               conversation_id: conversationIdRef.current,
