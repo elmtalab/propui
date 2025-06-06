@@ -4,6 +4,10 @@ import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
 import TimerIcon from '@mui/icons-material/Timer';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import EditIcon from '@mui/icons-material/Edit';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -99,6 +103,7 @@ const ChatConversationPage: React.FC = () => {
 
   const handleDelete = (id: number) => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
+    setMenuId(null);
   };
 
   const handleCopy = (textToCopy: string) => {
@@ -143,6 +148,7 @@ const ChatConversationPage: React.FC = () => {
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
 
   const handleSwipeReply = (msg: Message) => {
+    setMenuId(null);
     setReplyTo(msg);
 
     setText('');
@@ -349,85 +355,7 @@ const ChatConversationPage: React.FC = () => {
                 id={`msg-${msg.id}`}
                 className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''} ${dragState.id === msg.id ? 'dragging' : ''}`}
                 style={{ transform: dragState.id === msg.id ? `translateX(${dragState.dx}px)` : undefined }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setMenuId(msg.id);
-              }}
-
-              onMouseDown={(e) => {
-                if (e.button !== 0) return;
-                startX = e.clientX;
-                startY = e.clientY;
-                dragging = true;
-                moved = false;
-                setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => {
-                  if (!moved) setMenuId(msg.id);
-                }, 600);
-              }}
-              onMouseMove={(e) => {
-                if (!dragging || dragState.id !== msg.id) return;
-                if (
-                  Math.abs(e.clientX - startX) > 5 ||
-                  Math.abs(e.clientY - startY) > 5
-                ) {
-                  moved = true;
-                }
-                setDragState({ id: msg.id, dx: e.clientX - startX });
-              }}
-              onMouseUp={() => {
-                clearTimeout(timer);
-                if (dragging && dragState.id === msg.id) {
-                  if (dragState.dx > 60) {
-                    handleSwipeReply(msg);
-                    setSwipeId(msg.id);
-                    setTimeout(() => setSwipeId(null), 300);
-                  }
-                }
-                dragging = false;
-                moved = false;
-                setDragState({ id: null, dx: 0 });
-              }}
-              onMouseLeave={() => {
-                clearTimeout(timer);
-                dragging = false;
-                moved = false;
-                setDragState({ id: null, dx: 0 });
-              }}
-              onTouchStart={(e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                dragging = true;
-                moved = false;
-                setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => {
-                  if (!moved) setMenuId(msg.id);
-                }, 600);
-              }}
-              onTouchMove={(e) => {
-                if (!dragging || dragState.id !== msg.id) return;
-                if (
-                  Math.abs(e.touches[0].clientX - startX) > 5 ||
-                  Math.abs(e.touches[0].clientY - startY) > 5
-                ) {
-                  moved = true;
-                }
-                setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
-              }}
-              onTouchEnd={(e) => {
-                clearTimeout(timer);
-                const dx = e.changedTouches[0].clientX - startX;
-                const dy = e.changedTouches[0].clientY - startY;
-                if (dx > 50 && Math.abs(dy) < 30) {
-                  handleSwipeReply(msg);
-                  setSwipeId(msg.id);
-                  setTimeout(() => setSwipeId(null), 300);
-                }
-                dragging = false;
-                moved = false;
-                setDragState({ id: null, dx: 0 });
-              }}
-            >
+              >
               {idx > 0 && (
                 <span
                   className={`delay-wrapper ${me ? 'left' : 'right'}`}
@@ -458,14 +386,103 @@ const ChatConversationPage: React.FC = () => {
                 </span>
               )}
               {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
-              <div className="message-bubble" style={{ backgroundColor: av.color }}>
+              <div
+                className="message-bubble"
+                style={{ backgroundColor: av.color }}
+                onMouseDown={(e) => {
+                  if (e.button !== 0) return;
+                  startX = e.clientX;
+                  startY = e.clientY;
+                  dragging = true;
+                  moved = false;
+                  setDragState({ id: msg.id, dx: 0 });
+                  timer = setTimeout(() => {
+                    if (!moved) {
+                      setMenuId(msg.id);
+                      navigator.vibrate?.(50);
+                    }
+                  }, 500);
+                }}
+                onMouseMove={(e) => {
+                  if (!dragging || dragState.id !== msg.id) return;
+                  if (
+                    Math.abs(e.clientX - startX) > 5 ||
+                    Math.abs(e.clientY - startY) > 5
+                  ) {
+                    moved = true;
+                  }
+                  setDragState({ id: msg.id, dx: e.clientX - startX });
+                }}
+                onMouseUp={() => {
+                  clearTimeout(timer);
+                  if (dragging && dragState.id === msg.id) {
+                    if (dragState.dx > 60) {
+                      handleSwipeReply(msg);
+                      setSwipeId(msg.id);
+                      setTimeout(() => setSwipeId(null), 300);
+                    }
+                  }
+                  dragging = false;
+                  moved = false;
+                  setDragState({ id: null, dx: 0 });
+                }}
+                onMouseLeave={() => {
+                  clearTimeout(timer);
+                  dragging = false;
+                  moved = false;
+                  setDragState({ id: null, dx: 0 });
+                }}
+                onTouchStart={(e) => {
+                  startX = e.touches[0].clientX;
+                  startY = e.touches[0].clientY;
+                  dragging = true;
+                  moved = false;
+                  setDragState({ id: msg.id, dx: 0 });
+                  timer = setTimeout(() => {
+                    if (!moved) {
+                      setMenuId(msg.id);
+                      navigator.vibrate?.(50);
+                    }
+                  }, 500);
+                }}
+                onTouchMove={(e) => {
+                  if (!dragging || dragState.id !== msg.id) return;
+                  if (
+                    Math.abs(e.touches[0].clientX - startX) > 5 ||
+                    Math.abs(e.touches[0].clientY - startY) > 5
+                  ) {
+                    moved = true;
+                  }
+                  setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
+                }}
+                onTouchEnd={(e) => {
+                  clearTimeout(timer);
+                  const dx = e.changedTouches[0].clientX - startX;
+                  const dy = e.changedTouches[0].clientY - startY;
+                  if (dx > 50 && Math.abs(dy) < 30) {
+                    handleSwipeReply(msg);
+                    setSwipeId(msg.id);
+                    setTimeout(() => setSwipeId(null), 300);
+                  }
+                  dragging = false;
+                  moved = false;
+                  setDragState({ id: null, dx: 0 });
+                }}
+                onClick={(e) => {
+                  if (menuId === msg.id) e.stopPropagation();
+                }}
+              >
                 {reply && <div className="reply-text">{reply.text}</div>}
                 {msg.text}
                 <div className="message-time">
                   {new Date(computeTimestamp(idx)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
                 {menuId === msg.id && (
-                  <div className="message-menu">
+                  <div
+                    className="message-menu"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                  >
                     <button
                       onClick={() => {
                         setMenuId(null);
@@ -475,11 +492,17 @@ const ChatConversationPage: React.FC = () => {
                         setTimeout(() => inputRef.current?.focus(), 0);
                       }}
                     >
-                      Edit
+                      <EditIcon fontSize="small" /> Edit
                     </button>
-                    <button onClick={() => handleSwipeReply(msg)}>Reply</button>
-                    <button onClick={() => handleCopy(msg.text)}>Copy</button>
-                    <button onClick={() => handleDelete(msg.id)}>Delete</button>
+                    <button onClick={() => handleSwipeReply(msg)}>
+                      <ReplyIcon fontSize="small" /> Reply
+                    </button>
+                    <button onClick={() => handleCopy(msg.text)}>
+                      <ContentCopyIcon fontSize="small" /> Copy
+                    </button>
+                    <button onClick={() => handleDelete(msg.id)}>
+                      <DeleteIcon fontSize="small" /> Delete
+                    </button>
                   </div>
                 )}
               </div>
