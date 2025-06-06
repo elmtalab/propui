@@ -134,6 +134,9 @@
   transform: translateX(40px);
   transition: transform 0.2s;
 }
+.message-item.dragging {
+  transition: none;
+}
 
 .reply-text {
   font-size: 12px;
@@ -217,29 +220,33 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px;
   margin-bottom: 8px;
   position: sticky;
   top: 0;
-  background: #fff;
-  padding-bottom: 8px;
+  background: linear-gradient(135deg, #0088cc, #00bfff);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 2;
-
 }
 
 .back-icon {
   text-decoration: none;
   font-size: 24px;
   line-height: 1;
+  color: inherit;
 }
 
 .header-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  border: 2px solid #fff;
 }
 
 .header-name {
   font-weight: bold;
+  color: #fff;
 }
 
 .instruction-text {
@@ -268,8 +275,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  border-bottom: 1px solid #ccc;
-  background: #fff;
+  background: linear-gradient(135deg, #0088cc, #00bfff);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   position: sticky;
   top: 0;
   z-index: 3;
@@ -278,6 +286,7 @@
 .settings-icon {
   font-size: 24px;
   cursor: pointer;
+  color: #fff;
 }
 
 .tabs {

@@ -66,6 +66,9 @@ const ChatConversationPage: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [menuId, setMenuId] = useState<number | null>(null);
   const [swipeId, setSwipeId] = useState<number | null>(null);
+  const [dragState, setDragState] = useState<{ id: number | null; dx: number }>(
+    { id: null, dx: 0 }
+  );
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -311,6 +314,9 @@ const ChatConversationPage: React.FC = () => {
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
       </div>
+      <div style={{ marginBottom: 4, fontSize: 14 }}>
+        Your conversation will be executed at
+      </div>
       <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
         <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
       </div>
@@ -324,12 +330,14 @@ const ChatConversationPage: React.FC = () => {
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           let startX = 0;
           let startY = 0;
+          let dragging = false;
           let timer: NodeJS.Timeout;
           return (
             <React.Fragment key={msg.id}>
               <div
                 id={`msg-${msg.id}`}
-                className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
+                className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''} ${dragState.id === msg.id ? 'dragging' : ''}`}
+                style={{ transform: dragState.id === msg.id ? `translateX(${dragState.dx}px)` : undefined }}
               onContextMenu={(e) => {
                 e.preventDefault();
                 setMenuId(msg.id);
@@ -337,14 +345,43 @@ const ChatConversationPage: React.FC = () => {
 
               onMouseDown={(e) => {
                 if (e.button !== 0) return;
+                startX = e.clientX;
+                startY = e.clientY;
+                dragging = true;
+                setDragState({ id: msg.id, dx: 0 });
                 timer = setTimeout(() => setMenuId(msg.id), 600);
               }}
-              onMouseUp={() => clearTimeout(timer)}
-              onMouseLeave={() => clearTimeout(timer)}
+              onMouseMove={(e) => {
+                if (!dragging || dragState.id !== msg.id) return;
+                setDragState({ id: msg.id, dx: e.clientX - startX });
+              }}
+              onMouseUp={() => {
+                clearTimeout(timer);
+                if (dragging && dragState.id === msg.id) {
+                  if (dragState.dx > 60) {
+                    handleSwipeReply(msg);
+                    setSwipeId(msg.id);
+                    setTimeout(() => setSwipeId(null), 300);
+                  }
+                }
+                dragging = false;
+                setDragState({ id: null, dx: 0 });
+              }}
+              onMouseLeave={() => {
+                clearTimeout(timer);
+                dragging = false;
+                setDragState({ id: null, dx: 0 });
+              }}
               onTouchStart={(e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
+                dragging = true;
+                setDragState({ id: msg.id, dx: 0 });
                 timer = setTimeout(() => setMenuId(msg.id), 600);
+              }}
+              onTouchMove={(e) => {
+                if (!dragging || dragState.id !== msg.id) return;
+                setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
               }}
               onTouchEnd={(e) => {
                 clearTimeout(timer);
@@ -355,6 +392,8 @@ const ChatConversationPage: React.FC = () => {
                   setSwipeId(msg.id);
                   setTimeout(() => setSwipeId(null), 300);
                 }
+                dragging = false;
+                setDragState({ id: null, dx: 0 });
               }}
             >
               {idx > 0 && (
@@ -502,9 +541,6 @@ const ChatConversationPage: React.FC = () => {
           <SendIcon />
         </IconButton>
       </div>
-      <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginTop: 8 }}>
-        Generate a conversation with AI
-      </Button>
       <Dialog open={jsonOpen} onClose={() => setJsonOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Generated JSON</DialogTitle>
         <DialogContent>
