@@ -36,7 +36,6 @@ interface Message {
   replyTo?: number;
 }
 
-const nowIso = new Date().toISOString();
 const initialMessages: Record<string, Message[]> = {
   kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0 }],
   emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0 }],
