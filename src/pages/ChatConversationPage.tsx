@@ -103,6 +103,7 @@ const ChatConversationPage: React.FC = () => {
 
   const handleDelete = (id: number) => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
+    setMenuId(null);
   };
 
   const handleCopy = (textToCopy: string) => {
@@ -147,6 +148,7 @@ const ChatConversationPage: React.FC = () => {
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
 
   const handleSwipeReply = (msg: Message) => {
+    setMenuId(null);
     setReplyTo(msg);
 
     setText('');
