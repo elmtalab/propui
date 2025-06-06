@@ -70,7 +70,7 @@ const ChatConversationPage: React.FC = () => {
     { id: null, dx: 0 }
   );
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const initialStart = new Date();
   const [startDateTime, setStartDateTime] = useState<Date>(initialStart);
@@ -155,6 +155,12 @@ const ChatConversationPage: React.FC = () => {
     setMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
     );
+    setDelayMenuId(null);
+  };
+
+  const handleResetDelay = (id: number) => {
+    skipScrollRef.current = true;
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, delay: 0 } : m)));
     setDelayMenuId(null);
   };
 
@@ -256,7 +262,9 @@ const ChatConversationPage: React.FC = () => {
     };
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setText(e.target.value);
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
     scrollToMessage(targetId);
@@ -314,10 +322,11 @@ const ChatConversationPage: React.FC = () => {
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
       </div>
-      <div style={{ marginBottom: 4, fontSize: 14 }}>
-        Your conversation will be executed at
-      </div>
-      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+      <div
+        className="start-time-inputs"
+        style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
+      >
+        <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
       </div>
       <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginBottom: 8 }}>
@@ -331,6 +340,7 @@ const ChatConversationPage: React.FC = () => {
           let startX = 0;
           let startY = 0;
           let dragging = false;
+          let moved = false;
           let timer: NodeJS.Timeout;
           return (
             <React.Fragment key={msg.id}>
@@ -348,11 +358,20 @@ const ChatConversationPage: React.FC = () => {
                 startX = e.clientX;
                 startY = e.clientY;
                 dragging = true;
+                moved = false;
                 setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => setMenuId(msg.id), 600);
+                timer = setTimeout(() => {
+                  if (!moved) setMenuId(msg.id);
+                }, 600);
               }}
               onMouseMove={(e) => {
                 if (!dragging || dragState.id !== msg.id) return;
+                if (
+                  Math.abs(e.clientX - startX) > 5 ||
+                  Math.abs(e.clientY - startY) > 5
+                ) {
+                  moved = true;
+                }
                 setDragState({ id: msg.id, dx: e.clientX - startX });
               }}
               onMouseUp={() => {
@@ -365,22 +384,33 @@ const ChatConversationPage: React.FC = () => {
                   }
                 }
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
               onMouseLeave={() => {
                 clearTimeout(timer);
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
               onTouchStart={(e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 dragging = true;
+                moved = false;
                 setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => setMenuId(msg.id), 600);
+                timer = setTimeout(() => {
+                  if (!moved) setMenuId(msg.id);
+                }, 600);
               }}
               onTouchMove={(e) => {
                 if (!dragging || dragState.id !== msg.id) return;
+                if (
+                  Math.abs(e.touches[0].clientX - startX) > 5 ||
+                  Math.abs(e.touches[0].clientY - startY) > 5
+                ) {
+                  moved = true;
+                }
                 setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
               }}
               onTouchEnd={(e) => {
@@ -393,6 +423,7 @@ const ChatConversationPage: React.FC = () => {
                   setTimeout(() => setSwipeId(null), 300);
                 }
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
             >
@@ -412,6 +443,7 @@ const ChatConversationPage: React.FC = () => {
                   </IconButton>
                   {delayMenuId === msg.id && (
                     <div className={`message-menu ${me ? 'left' : 'right'}`}>
+                      <button onClick={() => handleResetDelay(msg.id)}>Reset</button>
                       {[1, 2, 3, 5].map((m) => (
                         <button
                           key={m}
@@ -498,19 +530,25 @@ const ChatConversationPage: React.FC = () => {
           {editingId !== null && (
             <div className="reply-preview">Editing message</div>
           )}
-          <input
+          <textarea
             ref={inputRef}
             value={text}
-            onChange={handleInputChange}
+            rows={1}
+            onChange={(e) => {
+              handleInputChange(e);
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = target.scrollHeight + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
               }
             }}
-
             onFocus={handleFocus}
             placeholder="Type here..."
+            style={{ resize: 'none', overflow: 'hidden' }}
           />
         </div>
 
