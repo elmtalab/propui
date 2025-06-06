@@ -70,7 +70,7 @@ const ChatConversationPage: React.FC = () => {
     { id: null, dx: 0 }
   );
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const initialStart = new Date();
   const [startDateTime, setStartDateTime] = useState<Date>(initialStart);
@@ -263,7 +263,7 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     setText(e.target.value);
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
@@ -513,7 +513,7 @@ const ChatConversationPage: React.FC = () => {
             value={text}
             rows={1}
             onChange={(e) => {
-              handleInputChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+              handleInputChange(e);
               const target = e.target as HTMLTextAreaElement;
               target.style.height = 'auto';
               target.style.height = target.scrollHeight + 'px';
