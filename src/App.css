@@ -96,6 +96,20 @@
   text-align: left;
 }
 
+.message-time {
+  font-size: 10px;
+  margin-top: 4px;
+  color: #333;
+}
+
+.delay-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 4px;
+}
+
 
 .message-item.swipe {
   transform: translateX(40px);

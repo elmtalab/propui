@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
+import CodeIcon from '@mui/icons-material/Code';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -22,21 +28,23 @@ const avatars: Avatar[] = [
 ];
 
 interface Message {
- id: number;
+  id: number;
   from: string;
   text: string;
+  delay: number;
   replyTo?: number;
 }
 
+const nowIso = new Date().toISOString();
 const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?" }],
-  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.' }],
-  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.' }],
-  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.' }],
-  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.' }],
-  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.' }],
-  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?' }],
-  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting." }],
+  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0 }],
+  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0 }],
+  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0 }],
+  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', delay: 0 }],
+  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', delay: 0 }],
+  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0 }],
+  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0 }],
+  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0 }],
 
 };
 
@@ -50,8 +58,19 @@ const ChatConversationPage: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [menuId, setMenuId] = useState<number | null>(null);
   const [swipeId, setSwipeId] = useState<number | null>(null);
+  const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const initialStart = new Date();
+  const [startDate, setStartDate] = useState(
+    initialStart.toISOString().slice(0, 10)
+  );
+  const [startTime, setStartTime] = useState(
+    initialStart.toISOString().slice(11, 16)
+  );
+  const conversationStartRef = useRef<string>(initialStart.toISOString());
+  const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
+  const [jsonOpen, setJsonOpen] = useState(false);
 
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
@@ -86,14 +105,18 @@ const ChatConversationPage: React.FC = () => {
     if (!text.trim()) return;
     setMessages((prev) => {
       if (editingId !== null) {
-        return prev.map((m) =>
-          m.id === editingId ? { ...m, text } : m
-        );
+        return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
       }
       const newId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       return [
         ...prev,
-        { id: newId, from: selectedAvatar.id, text, replyTo: replyTo?.id },
+        {
+          id: newId,
+          from: selectedAvatar.id,
+          text,
+          delay: 0,
+          replyTo: replyTo?.id,
+        },
       ];
     });
     setText('');
@@ -119,6 +142,89 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const handleAddDelay = (id: number, minutes: number) => {
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
+    );
+    setDelayMenuId(null);
+  };
+
+  const computeTimestamp = (index: number) => {
+    let total = 0;
+    for (let i = 1; i <= index; i++) {
+      total += messages[i].delay;
+    }
+    return new Date(
+      new Date(conversationStartRef.current).getTime() + total * 60000
+    ).toISOString();
+  };
+
+  const generateJSON = () => {
+    let cumulative = 0;
+    const start = new Date(conversationStartRef.current).getTime();
+    const msgs = messages.map((m, idx) => {
+      if (idx > 0) {
+        cumulative += m.delay;
+      }
+      const timestamp = new Date(start + cumulative * 60000).toISOString();
+      const relative = idx === 0 ? 0 : m.delay * 60;
+      return {
+        message_id: `m-${m.id}`,
+        sender_id: m.from,
+        sender_name: m.from,
+        message_content: m.text,
+        message_type: 'text',
+        timestamp,
+        relative_time: relative,
+        status: 'pending',
+        metadata: {
+          language: 'en',
+        },
+      };
+    });
+
+    const members = Array.from(new Set(messages.map((m) => m.from))).map((u) => ({
+      telegram_user_id: u,
+      telegram_user_name: u,
+      role: 'member',
+      status: 'active',
+      joined_at: conversationStartRef.current,
+    }));
+
+    return {
+      system_metadata: {
+        version: '1.0.1',
+        generated_at: new Date().toISOString(),
+        timezone: 'UTC',
+        description:
+          'Ledger of AI-only outbound interactions inside Telegram groups',
+      },
+      groups: [
+        {
+          group_id: id,
+          group_name: id,
+          privacy_level: 'public',
+          created_at: new Date().toISOString(),
+          created_by: 123456789,
+          group_description: '',
+          members,
+          conversations: [
+            {
+              conversation_id: conversationIdRef.current,
+              start_time: conversationStartRef.current,
+              initiated_by: selectedAvatar.id,
+              topic: '',
+              conversation_metadata: { active: true, tags: [] },
+              messages: msgs,
+            },
+          ],
+        },
+      ],
+      ai_users: [],
+      audit_log: [],
+    };
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
@@ -134,6 +240,11 @@ const ChatConversationPage: React.FC = () => {
       scrollToMessage(replyTo.id);
     }
   }, [replyTo]);
+
+  useEffect(() => {
+    const iso = new Date(`${startDate}T${startTime}:00Z`).toISOString();
+    conversationStartRef.current = iso;
+  }, [startDate, startTime]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -166,8 +277,12 @@ const ChatConversationPage: React.FC = () => {
         />
         <span className="header-name">{id}</span>
       </div>
+      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+      </div>
       <div className="chat-messages" ref={messagesRef}>
-        {messages.map((msg) => {
+        {messages.map((msg, idx) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
@@ -206,10 +321,37 @@ const ChatConversationPage: React.FC = () => {
                 }
               }}
             >
+              {idx > 0 && (
+                <>
+                  <button
+                    className="delay-btn"
+                    onClick={() =>
+                      setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
+                    }
+                  >
+                    +
+                  </button>
+                  {delayMenuId === msg.id && (
+                    <div className="message-menu">
+                      {[1, 2, 3, 5].map((m) => (
+                        <button
+                          key={m}
+                          onClick={() => handleAddDelay(msg.id, m)}
+                        >
+                          +{m}m
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
               {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               <div className="message-bubble" style={{ backgroundColor: av.color }}>
                 {reply && <div className="reply-text">{reply.text}</div>}
                 {msg.text}
+                <div className="message-time">
+                  {new Date(computeTimestamp(idx)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
                 {menuId === msg.id && (
                   <div className="message-menu">
                     <button
@@ -226,10 +368,8 @@ const ChatConversationPage: React.FC = () => {
                     <button onClick={() => handleSwipeReply(msg)}>Reply</button>
                     <button onClick={() => handleCopy(msg.text)}>Copy</button>
                     <button onClick={() => handleDelete(msg.id)}>Delete</button>
-
                   </div>
                 )}
-
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
             </div>
@@ -295,6 +435,15 @@ const ChatConversationPage: React.FC = () => {
 
         <IconButton
           onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setJsonOpen(true)}
+          color="primary"
+          aria-label="show-json"
+        >
+          <CodeIcon />
+        </IconButton>
+
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleSend}
           color="primary"
           aria-label="send"
@@ -302,6 +451,17 @@ const ChatConversationPage: React.FC = () => {
           <SendIcon />
         </IconButton>
       </div>
+      <Dialog open={jsonOpen} onClose={() => setJsonOpen(false)} fullWidth maxWidth="md">
+        <DialogTitle>Generated JSON</DialogTitle>
+        <DialogContent>
+          <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            {JSON.stringify(generateJSON(), null, 2)}
+          </pre>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setJsonOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
