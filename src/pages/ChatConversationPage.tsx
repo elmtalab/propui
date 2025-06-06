@@ -4,6 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
 import TimerIcon from '@mui/icons-material/Timer';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -324,6 +325,7 @@ const ChatConversationPage: React.FC = () => {
           let startX = 0;
           let startY = 0;
           let timer: NodeJS.Timeout;
+          const midIndex = Math.floor(messages.length / 2);
           return (
             <React.Fragment key={msg.id}>
               <div
@@ -412,6 +414,7 @@ const ChatConversationPage: React.FC = () => {
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               </div>
+
             </React.Fragment>
           );
         })}
@@ -500,6 +503,9 @@ const ChatConversationPage: React.FC = () => {
           <SendIcon />
         </IconButton>
       </div>
+      <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginTop: 8 }}>
+        Generate a conversation with AI
+      </Button>
       <Dialog open={jsonOpen} onClose={() => setJsonOpen(false)} fullWidth maxWidth="md">
         <DialogTitle>Generated JSON</DialogTitle>
         <DialogContent>
