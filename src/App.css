@@ -153,7 +153,7 @@
 
 .message-input-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -161,8 +161,14 @@
   max-width: 480px;
   margin: 0 auto;
   padding: 8px;
+  padding-right: 48px;
   background: #fff;
   border-top: 1px solid #ccc;
+  transition: all 0.3s;
+}
+
+.message-input-container.focused .MuiIconButton-root:not(.send-button) {
+  display: none;
 }
 
 .message-input-container textarea {
@@ -174,6 +180,21 @@
   font-size: 14px;
   background: #f9f9f9;
   line-height: 1.4;
+  transition: width 0.3s;
+  max-height: 20vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.message-input-container.focused textarea {
+  width: 100%;
+}
+
+.send-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
 .selected-avatar {
@@ -203,8 +224,19 @@
   cursor: pointer;
 }
 
+.reply-preview-wrapper {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 8px;
+  z-index: 5;
+}
+
 .reply-preview {
-  font-size: 12px;
+  font-size: 16px;
   background: #f0f0f0;
   padding: 4px;
   border-left: 4px solid #ccc;
@@ -218,6 +250,7 @@
   margin-left: 8px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 20px;
 }
 
 .chat-header {
@@ -266,12 +299,29 @@
 }
 
 .generate-btn {
-  background: linear-gradient(135deg, #0088cc, #00bfff);
+  background: linear-gradient(90deg, #007fff, #00c6ff);
   color: #fff;
-  padding: 8px;
-  border-radius: 20px;
-  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 16px;
+  width: 100%;
+  font-family: "Roboto", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: filter 0.2s, box-shadow 0.2s;
+}
+
+.generate-btn:hover {
+  filter: brightness(0.95);
+}
+
+.generate-btn:active {
+  filter: brightness(0.9);
+  box-shadow: 0 0 6px rgba(0, 198, 255, 0.6);
 }
 
 .inbox-header {
