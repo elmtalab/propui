@@ -97,6 +97,7 @@ const ChatConversationPage: React.FC = () => {
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
 
+
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
     const el = document.getElementById(`msg-${msgId}`);
@@ -440,7 +441,7 @@ const handleInputChange = (
                   g.dragging = true;
                   g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
-                  // prepare for potential swipe
+
 
                 }}
                 onMouseMove={(e) => {
@@ -456,6 +457,7 @@ const handleInputChange = (
                 }}
                 onMouseUp={() => {
                   const g = gestureRef.current;
+
                   if (g.dragging && dragState.id === msg.id) {
                     if (dragState.dx > 60) {
                       handleSwipeReply(msg);
@@ -469,6 +471,7 @@ const handleInputChange = (
                 }}
                 onMouseLeave={() => {
                   const g = gestureRef.current;
+
                   g.dragging = false;
                   g.moved = false;
                   setDragState({ id: null, dx: 0 });
@@ -480,6 +483,7 @@ const handleInputChange = (
                   g.dragging = true;
                   g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
+
 
                 }}
                 onTouchMove={(e) => {
@@ -495,6 +499,7 @@ const handleInputChange = (
                 }}
                 onTouchEnd={(e) => {
                   const g = gestureRef.current;
+
                   const dx = e.changedTouches[0].clientX - g.startX;
                   const dy = e.changedTouches[0].clientY - g.startY;
                   if (dx > 50 && Math.abs(dy) < 30) {
