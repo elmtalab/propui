@@ -181,10 +181,11 @@
   background: #f9f9f9;
   line-height: 1.4;
   transition: width 0.3s;
-  max-height: 20vh;
+ max-height: 20vh;
   overflow-y: auto;
   overflow-wrap: anywhere;
   word-break: break-word;
+
 }
 
 .message-input-container.focused textarea {
@@ -195,6 +196,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
+
 }
 
 .selected-avatar {
