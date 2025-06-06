@@ -325,7 +325,6 @@ const ChatConversationPage: React.FC = () => {
           let startX = 0;
           let startY = 0;
           let timer: NodeJS.Timeout;
-          const midIndex = Math.floor(messages.length / 2);
           return (
             <React.Fragment key={msg.id}>
               <div
