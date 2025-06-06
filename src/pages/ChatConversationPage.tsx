@@ -389,6 +389,7 @@ const ChatConversationPage: React.FC = () => {
               <div
                 className="message-bubble"
                 style={{ backgroundColor: av.color }}
+
                 onMouseDown={(e) => {
                   if (e.button !== 0) return;
                   startX = e.clientX;
@@ -402,6 +403,7 @@ const ChatConversationPage: React.FC = () => {
                       navigator.vibrate?.(50);
                     }
                   }, 500);
+
                 }}
                 onMouseMove={(e) => {
                   if (!dragging || dragState.id !== msg.id) return;
@@ -444,6 +446,7 @@ const ChatConversationPage: React.FC = () => {
                       navigator.vibrate?.(50);
                     }
                   }, 500);
+
                 }}
                 onTouchMove={(e) => {
                   if (!dragging || dragState.id !== msg.id) return;
