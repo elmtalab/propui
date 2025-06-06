@@ -88,6 +88,14 @@ const ChatConversationPage: React.FC = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+  const gestureRef = useRef({
+    startX: 0,
+    startY: 0,
+    dragging: false,
+    moved: false,
+    timer: null as NodeJS.Timeout | null,
+  });
+
 
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
@@ -153,9 +161,6 @@ const handleSend = () => {
     scrollToMessage(targetId);
     setTimeout(scrollToBottomIfNeeded, 100);
     setInputFocused(true);
-
-  const handleBlur = () => {
-    setInputFocused(false);
   };
 
   const handleBlur = () => {
@@ -380,11 +385,6 @@ const handleInputChange = (
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
-          let startX = 0;
-          let startY = 0;
-          let dragging = false;
-          let moved = false;
-          let timer: NodeJS.Timeout;
           return (
             <React.Fragment key={msg.id}>
               <div
@@ -428,13 +428,14 @@ const handleInputChange = (
 
                 onMouseDown={(e) => {
                   if (e.button !== 0) return;
-                  startX = e.clientX;
-                  startY = e.clientY;
-                  dragging = true;
-                  moved = false;
+                  const g = gestureRef.current;
+                  g.startX = e.clientX;
+                  g.startY = e.clientY;
+                  g.dragging = true;
+                  g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
-                  timer = setTimeout(() => {
-                    if (!moved) {
+                  g.timer = setTimeout(() => {
+                    if (!gestureRef.current.moved) {
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
@@ -442,42 +443,46 @@ const handleInputChange = (
 
                 }}
                 onMouseMove={(e) => {
-                  if (!dragging || dragState.id !== msg.id) return;
+                  const g = gestureRef.current;
+                  if (!g.dragging || dragState.id !== msg.id) return;
                   if (
-                    Math.abs(e.clientX - startX) > 5 ||
-                    Math.abs(e.clientY - startY) > 5
+                    Math.abs(e.clientX - g.startX) > 5 ||
+                    Math.abs(e.clientY - g.startY) > 5
                   ) {
-                    moved = true;
+                    g.moved = true;
                   }
-                  setDragState({ id: msg.id, dx: e.clientX - startX });
+                  setDragState({ id: msg.id, dx: e.clientX - g.startX });
                 }}
                 onMouseUp={() => {
-                  clearTimeout(timer);
-                  if (dragging && dragState.id === msg.id) {
+                  const g = gestureRef.current;
+                  if (g.timer) clearTimeout(g.timer);
+                  if (g.dragging && dragState.id === msg.id) {
                     if (dragState.dx > 60) {
                       handleSwipeReply(msg);
                       setSwipeId(msg.id);
                       setTimeout(() => setSwipeId(null), 300);
                     }
                   }
-                  dragging = false;
-                  moved = false;
+                  g.dragging = false;
+                  g.moved = false;
                   setDragState({ id: null, dx: 0 });
                 }}
                 onMouseLeave={() => {
-                  clearTimeout(timer);
-                  dragging = false;
-                  moved = false;
+                  const g = gestureRef.current;
+                  if (g.timer) clearTimeout(g.timer);
+                  g.dragging = false;
+                  g.moved = false;
                   setDragState({ id: null, dx: 0 });
                 }}
                 onTouchStart={(e) => {
-                  startX = e.touches[0].clientX;
-                  startY = e.touches[0].clientY;
-                  dragging = true;
-                  moved = false;
+                  const g = gestureRef.current;
+                  g.startX = e.touches[0].clientX;
+                  g.startY = e.touches[0].clientY;
+                  g.dragging = true;
+                  g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
-                  timer = setTimeout(() => {
-                    if (!moved) {
+                  g.timer = setTimeout(() => {
+                    if (!gestureRef.current.moved) {
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
@@ -485,26 +490,28 @@ const handleInputChange = (
 
                 }}
                 onTouchMove={(e) => {
-                  if (!dragging || dragState.id !== msg.id) return;
+                  const g = gestureRef.current;
+                  if (!g.dragging || dragState.id !== msg.id) return;
                   if (
-                    Math.abs(e.touches[0].clientX - startX) > 5 ||
-                    Math.abs(e.touches[0].clientY - startY) > 5
+                    Math.abs(e.touches[0].clientX - g.startX) > 5 ||
+                    Math.abs(e.touches[0].clientY - g.startY) > 5
                   ) {
-                    moved = true;
+                    g.moved = true;
                   }
-                  setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
+                  setDragState({ id: msg.id, dx: e.touches[0].clientX - g.startX });
                 }}
                 onTouchEnd={(e) => {
-                  clearTimeout(timer);
-                  const dx = e.changedTouches[0].clientX - startX;
-                  const dy = e.changedTouches[0].clientY - startY;
+                  const g = gestureRef.current;
+                  if (g.timer) clearTimeout(g.timer);
+                  const dx = e.changedTouches[0].clientX - g.startX;
+                  const dy = e.changedTouches[0].clientY - g.startY;
                   if (dx > 50 && Math.abs(dy) < 30) {
                     handleSwipeReply(msg);
                     setSwipeId(msg.id);
                     setTimeout(() => setSwipeId(null), 300);
                   }
-                  dragging = false;
-                  moved = false;
+                  g.dragging = false;
+                  g.moved = false;
                   setDragState({ id: null, dx: 0 });
                 }}
                 onClick={(e) => {
