@@ -481,7 +481,11 @@ const ChatConversationPage: React.FC = () => {
                   {new Date(computeTimestamp(idx)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
                 {menuId === msg.id && (
-                  <div className="message-menu">
+                  <div
+                    className="message-menu"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                  >
                     <button
                       onClick={() => {
                         setMenuId(null);
