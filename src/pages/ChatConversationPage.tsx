@@ -8,6 +8,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -84,6 +86,8 @@ const ChatConversationPage: React.FC = () => {
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
 
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
@@ -177,6 +181,7 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleGenerateAI = () => {
+    setGenerating(true);
     setMessages((prev) => {
       const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       const generated: Message[] = [];
@@ -192,6 +197,7 @@ const ChatConversationPage: React.FC = () => {
       return [...prev, ...generated];
     });
     scrollToBottomIfNeeded();
+    setTimeout(() => setGenerating(false), 500);
   };
 
   const computeTimestamp = (index: number) => {
@@ -342,8 +348,21 @@ const ChatConversationPage: React.FC = () => {
         <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
       </div>
-      <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginBottom: 8 }}>
-        Generate a conversation with AI
+      <Button
+        className="generate-btn"
+        onClick={handleGenerateAI}
+        disabled={generating}
+        fullWidth
+        style={{ marginBottom: 8 }}
+      >
+        {generating ? (
+          <CircularProgress size={20} color="inherit" />
+        ) : (
+          <>
+            <AutoAwesomeIcon style={{ marginRight: 4 }} />
+            Generate a conversation with AI
+          </>
+        )}
       </Button>
       <div className="chat-messages" ref={messagesRef}>
         {messages.map((msg, idx) => {

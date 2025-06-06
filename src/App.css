@@ -288,12 +288,29 @@
 }
 
 .generate-btn {
-  background: linear-gradient(135deg, #0088cc, #00bfff);
+  background: linear-gradient(90deg, #007fff, #00c6ff);
   color: #fff;
-  padding: 8px;
-  border-radius: 20px;
-  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 16px;
+  width: 100%;
+  font-family: "Roboto", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: filter 0.2s, box-shadow 0.2s;
+}
+
+.generate-btn:hover {
+  filter: brightness(0.95);
+}
+
+.generate-btn:active {
+  filter: brightness(0.9);
+  box-shadow: 0 0 6px rgba(0, 198, 255, 0.6);
 }
 
 .inbox-header {
