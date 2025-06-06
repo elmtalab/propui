@@ -264,6 +264,7 @@ const ChatConversationPage: React.FC = () => {
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
+
   ) => {
     setText(e.target.value);
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
@@ -514,6 +515,7 @@ const ChatConversationPage: React.FC = () => {
             rows={1}
             onChange={(e) => {
               handleInputChange(e);
+
               const target = e.target as HTMLTextAreaElement;
               target.style.height = 'auto';
               target.style.height = target.scrollHeight + 'px';
