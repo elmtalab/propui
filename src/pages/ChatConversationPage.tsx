@@ -158,6 +158,12 @@ const ChatConversationPage: React.FC = () => {
     setDelayMenuId(null);
   };
 
+  const handleResetDelay = (id: number) => {
+    skipScrollRef.current = true;
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, delay: 0 } : m)));
+    setDelayMenuId(null);
+  };
+
   const handleGenerateAI = () => {
     setMessages((prev) => {
       const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
@@ -256,7 +262,9 @@ const ChatConversationPage: React.FC = () => {
     };
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setText(e.target.value);
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
     scrollToMessage(targetId);
@@ -314,10 +322,11 @@ const ChatConversationPage: React.FC = () => {
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
       </div>
-      <div style={{ marginBottom: 4, fontSize: 14 }}>
-        Your conversation will be executed at
-      </div>
-      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+      <div
+        className="start-time-inputs"
+        style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
+      >
+        <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
       </div>
       <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginBottom: 8 }}>
@@ -412,6 +421,7 @@ const ChatConversationPage: React.FC = () => {
                   </IconButton>
                   {delayMenuId === msg.id && (
                     <div className={`message-menu ${me ? 'left' : 'right'}`}>
+                      <button onClick={() => handleResetDelay(msg.id)}>Reset</button>
                       {[1, 2, 3, 5].map((m) => (
                         <button
                           key={m}
@@ -498,19 +508,25 @@ const ChatConversationPage: React.FC = () => {
           {editingId !== null && (
             <div className="reply-preview">Editing message</div>
           )}
-          <input
+          <textarea
             ref={inputRef}
             value={text}
-            onChange={handleInputChange}
+            rows={1}
+            onChange={(e) => {
+              handleInputChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = target.scrollHeight + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
               }
             }}
-
             onFocus={handleFocus}
             placeholder="Type here..."
+            style={{ resize: 'none', overflow: 'hidden' }}
           />
         </div>
 
