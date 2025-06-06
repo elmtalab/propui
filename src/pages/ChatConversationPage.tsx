@@ -119,9 +119,9 @@ const ChatConversationPage: React.FC = () => {
   };
 
 
-  const handleSend = () => {
-    if (!text.trim()) return;
-    setMessages((prev) => {
+const handleSend = () => {
+  if (!text.trim()) return;
+  setMessages((prev) => {
       if (editingId !== null) {
         return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
       }
@@ -141,7 +141,12 @@ const ChatConversationPage: React.FC = () => {
     setEditingId(null);
     setReplyTo(null);
     scrollToBottomIfNeeded();
-  };
+    setInputFocused(false);
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.blur();
+    }
+};
 
   const handleFocus = () => {
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
@@ -149,6 +154,8 @@ const ChatConversationPage: React.FC = () => {
     setTimeout(scrollToBottomIfNeeded, 100);
     setInputFocused(true);
 
+  const handleBlur = () => {
+    setInputFocused(false);
   };
 
   const handleBlur = () => {
@@ -280,14 +287,18 @@ const ChatConversationPage: React.FC = () => {
     };
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLTextAreaElement>
+) => {
+  setText(e.target.value);
+  const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
+  scrollToMessage(targetId);
 
-  ) => {
-    setText(e.target.value);
-    const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
-    scrollToMessage(targetId);
-  };
+  const target = e.target as HTMLTextAreaElement;
+  target.style.height = 'auto';
+  const max = window.innerHeight * 0.2;
+  target.style.height = Math.min(target.scrollHeight, max) + 'px';
+};
 
   useEffect(() => {
     if (skipScrollRef.current) {
@@ -588,13 +599,7 @@ const ChatConversationPage: React.FC = () => {
             ref={inputRef}
             value={text}
             rows={1}
-            onChange={(e) => {
-              handleInputChange(e);
-
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = 'auto';
-              target.style.height = target.scrollHeight + 'px';
-            }}
+            onChange={handleInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -604,7 +609,7 @@ const ChatConversationPage: React.FC = () => {
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder="Type here..."
-            style={{ resize: 'none', overflow: 'hidden' }}
+            style={{ resize: 'none', overflow: 'auto' }}
           />
         </div>
 

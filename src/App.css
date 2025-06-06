@@ -153,7 +153,7 @@
 
 .message-input-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -161,6 +161,7 @@
   max-width: 480px;
   margin: 0 auto;
   padding: 8px;
+  padding-right: 48px;
   background: #fff;
   border-top: 1px solid #ccc;
   transition: all 0.3s;
@@ -180,10 +181,22 @@
   background: #f9f9f9;
   line-height: 1.4;
   transition: width 0.3s;
+ max-height: 20vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
 }
 
 .message-input-container.focused textarea {
   width: 100%;
+}
+
+.send-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
 }
 
 .selected-avatar {
