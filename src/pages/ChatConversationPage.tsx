@@ -88,6 +88,7 @@ const ChatConversationPage: React.FC = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
     const el = document.getElementById(`msg-${msgId}`);
