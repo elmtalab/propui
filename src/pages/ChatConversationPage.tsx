@@ -341,6 +341,7 @@ const ChatConversationPage: React.FC = () => {
           let startX = 0;
           let startY = 0;
           let dragging = false;
+          let moved = false;
           let timer: NodeJS.Timeout;
           return (
             <React.Fragment key={msg.id}>
@@ -358,11 +359,20 @@ const ChatConversationPage: React.FC = () => {
                 startX = e.clientX;
                 startY = e.clientY;
                 dragging = true;
+                moved = false;
                 setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => setMenuId(msg.id), 600);
+                timer = setTimeout(() => {
+                  if (!moved) setMenuId(msg.id);
+                }, 600);
               }}
               onMouseMove={(e) => {
                 if (!dragging || dragState.id !== msg.id) return;
+                if (
+                  Math.abs(e.clientX - startX) > 5 ||
+                  Math.abs(e.clientY - startY) > 5
+                ) {
+                  moved = true;
+                }
                 setDragState({ id: msg.id, dx: e.clientX - startX });
               }}
               onMouseUp={() => {
@@ -375,22 +385,33 @@ const ChatConversationPage: React.FC = () => {
                   }
                 }
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
               onMouseLeave={() => {
                 clearTimeout(timer);
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
               onTouchStart={(e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 dragging = true;
+                moved = false;
                 setDragState({ id: msg.id, dx: 0 });
-                timer = setTimeout(() => setMenuId(msg.id), 600);
+                timer = setTimeout(() => {
+                  if (!moved) setMenuId(msg.id);
+                }, 600);
               }}
               onTouchMove={(e) => {
                 if (!dragging || dragState.id !== msg.id) return;
+                if (
+                  Math.abs(e.touches[0].clientX - startX) > 5 ||
+                  Math.abs(e.touches[0].clientY - startY) > 5
+                ) {
+                  moved = true;
+                }
                 setDragState({ id: msg.id, dx: e.touches[0].clientX - startX });
               }}
               onTouchEnd={(e) => {
@@ -403,6 +424,7 @@ const ChatConversationPage: React.FC = () => {
                   setTimeout(() => setSwipeId(null), 300);
                 }
                 dragging = false;
+                moved = false;
                 setDragState({ id: null, dx: 0 });
               }}
             >
