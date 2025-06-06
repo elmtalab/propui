@@ -93,8 +93,9 @@ const ChatConversationPage: React.FC = () => {
     startY: 0,
     dragging: false,
     moved: false,
-    timer: null as NodeJS.Timeout | null,
   });
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+
 
 
   const scrollToMessage = (msgId: number | undefined) => {
@@ -117,6 +118,7 @@ const ChatConversationPage: React.FC = () => {
   const handleDelete = (id: number) => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
     setMenuId(null);
+    setMenuPosition(null);
   };
 
   const handleCopy = (textToCopy: string) => {
@@ -124,6 +126,7 @@ const ChatConversationPage: React.FC = () => {
       /* ignore */
     });
     setMenuId(null);
+    setMenuPosition(null);
   };
 
 
@@ -171,6 +174,7 @@ const handleSend = () => {
 
   const handleSwipeReply = (msg: Message) => {
     setMenuId(null);
+    setMenuPosition(null);
     setReplyTo(msg);
 
     setText('');
@@ -343,7 +347,10 @@ const handleInputChange = (
         display: 'flex',
         flexDirection: 'column',
       }}
-      onClick={() => setMenuId(null)}
+      onClick={() => {
+        setMenuId(null);
+        setMenuPosition(null);
+      }}
     >
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
@@ -434,12 +441,7 @@ const handleInputChange = (
                   g.dragging = true;
                   g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
-                  g.timer = setTimeout(() => {
-                    if (!gestureRef.current.moved) {
-                      setMenuId(msg.id);
-                      navigator.vibrate?.(50);
-                    }
-                  }, 500);
+
 
                 }}
                 onMouseMove={(e) => {
@@ -455,7 +457,7 @@ const handleInputChange = (
                 }}
                 onMouseUp={() => {
                   const g = gestureRef.current;
-                  if (g.timer) clearTimeout(g.timer);
+
                   if (g.dragging && dragState.id === msg.id) {
                     if (dragState.dx > 60) {
                       handleSwipeReply(msg);
@@ -469,7 +471,7 @@ const handleInputChange = (
                 }}
                 onMouseLeave={() => {
                   const g = gestureRef.current;
-                  if (g.timer) clearTimeout(g.timer);
+
                   g.dragging = false;
                   g.moved = false;
                   setDragState({ id: null, dx: 0 });
@@ -481,12 +483,7 @@ const handleInputChange = (
                   g.dragging = true;
                   g.moved = false;
                   setDragState({ id: msg.id, dx: 0 });
-                  g.timer = setTimeout(() => {
-                    if (!gestureRef.current.moved) {
-                      setMenuId(msg.id);
-                      navigator.vibrate?.(50);
-                    }
-                  }, 500);
+
 
                 }}
                 onTouchMove={(e) => {
@@ -502,7 +499,7 @@ const handleInputChange = (
                 }}
                 onTouchEnd={(e) => {
                   const g = gestureRef.current;
-                  if (g.timer) clearTimeout(g.timer);
+
                   const dx = e.changedTouches[0].clientX - g.startX;
                   const dy = e.changedTouches[0].clientY - g.startY;
                   if (dx > 50 && Math.abs(dy) < 30) {
@@ -515,7 +512,16 @@ const handleInputChange = (
                   setDragState({ id: null, dx: 0 });
                 }}
                 onClick={(e) => {
-                  if (menuId === msg.id) e.stopPropagation();
+                  const g = gestureRef.current;
+                  if (g.moved) {
+                    g.moved = false;
+                    return;
+                  }
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  setMenuPosition({ x: rect.right, y: rect.top - 40 });
+                  setMenuId(msg.id);
+                  navigator.vibrate?.(50);
+                  e.stopPropagation();
                 }}
               >
                 {reply && <div className="reply-text">{reply.text}</div>}
@@ -526,12 +532,14 @@ const handleInputChange = (
                 {menuId === msg.id && (
                   <div
                     className="message-menu"
+                    style={{ left: menuPosition?.x, top: menuPosition?.y }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
                     <button
                       onClick={() => {
                         setMenuId(null);
+                        setMenuPosition(null);
                         setText(msg.text);
                         setEditingId(msg.id);
                         setReplyTo(null);

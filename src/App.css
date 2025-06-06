@@ -73,9 +73,7 @@
 }
 
 .message-menu {
-  position: absolute;
-  top: -32px;
-  right: 0;
+  position: fixed;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -83,14 +81,7 @@
   border: 1px solid #ccc;
   padding: 4px;
   border-radius: 4px;
-  z-index: 50;
-}
-.message-menu.left {
-  right: auto;
-  left: 0;
-}
-.message-menu.right {
-  right: 0;
+  z-index: 1000;
 }
 
 .message-menu button {
@@ -153,7 +144,7 @@
 
 .message-input-container {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -161,7 +152,6 @@
   max-width: 480px;
   margin: 0 auto;
   padding: 8px;
-  padding-right: 48px;
   background: #fff;
   border-top: 1px solid #ccc;
   transition: all 0.3s;
@@ -193,10 +183,7 @@
 }
 
 .send-button {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
+  margin-left: 4px;
 }
 
 .selected-avatar {
