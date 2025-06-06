@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
+import TimerIcon from '@mui/icons-material/Timer';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -347,17 +348,21 @@ const ChatConversationPage: React.FC = () => {
               }}
             >
               {idx > 0 && (
-                <>
-                  <button
+                <span
+                  className={`delay-wrapper ${me ? 'left' : 'right'}`}
+                  onClick={() =>
+                    setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
+                  }
+                >
+                  <IconButton
                     className="delay-btn"
-                    onClick={() =>
-                      setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
-                    }
+                    size="small"
+                    onMouseDown={(e) => e.stopPropagation()}
                   >
-                    +
-                  </button>
+                    <TimerIcon fontSize="inherit" />
+                  </IconButton>
                   {delayMenuId === msg.id && (
-                    <div className="message-menu">
+                    <div className={`message-menu ${me ? 'left' : 'right'}`}>
                       {[1, 2, 3, 5].map((m) => (
                         <button
                           key={m}
@@ -368,7 +373,7 @@ const ChatConversationPage: React.FC = () => {
                       ))}
                     </div>
                   )}
-                </>
+                </span>
               )}
               {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               <div className="message-bubble" style={{ backgroundColor: av.color }}>
