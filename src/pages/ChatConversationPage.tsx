@@ -2,11 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
+import TimerIcon from '@mui/icons-material/Timer';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import DateTimePicker from 'react-datetime-picker';
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -63,15 +69,11 @@ const ChatConversationPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const initialStart = new Date();
-  const [startDate, setStartDate] = useState(
-    initialStart.toISOString().slice(0, 10)
-  );
-  const [startTime, setStartTime] = useState(
-    initialStart.toISOString().slice(11, 16)
-  );
+  const [startDateTime, setStartDateTime] = useState<Date>(initialStart);
   const conversationStartRef = useRef<string>(initialStart.toISOString());
 
   const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
+  const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
 
   const scrollToMessage = (msgId: number | undefined) => {
@@ -145,10 +147,29 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleAddDelay = (id: number, minutes: number) => {
+    skipScrollRef.current = true;
     setMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
     );
     setDelayMenuId(null);
+  };
+
+  const handleGenerateAI = () => {
+    setMessages((prev) => {
+      const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
+      const generated: Message[] = [];
+      for (let i = 0; i < 10; i++) {
+        const avatar = avatars[i % avatars.length];
+        generated.push({
+          id: startId + i,
+          from: avatar.id,
+          text: `Automated message ${i + 1}`,
+          delay: 0,
+        });
+      }
+      return [...prev, ...generated];
+    });
+    scrollToBottomIfNeeded();
   };
 
   const computeTimestamp = (index: number) => {
@@ -238,7 +259,11 @@ const ChatConversationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottomIfNeeded();
+    if (skipScrollRef.current) {
+      skipScrollRef.current = false;
+    } else {
+      scrollToBottomIfNeeded();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -248,9 +273,8 @@ const ChatConversationPage: React.FC = () => {
   }, [replyTo]);
 
   useEffect(() => {
-    const iso = new Date(`${startDate}T${startTime}:00Z`).toISOString();
-    conversationStartRef.current = iso;
-  }, [startDate, startTime]);
+    conversationStartRef.current = startDateTime.toISOString();
+  }, [startDateTime]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -283,10 +307,15 @@ const ChatConversationPage: React.FC = () => {
         />
         <span className="header-name">{id}</span>
       </div>
-      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+      <div className="instruction-text">
+        You are creating messages. The AI will execute these messages.
       </div>
+      <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
+      </div>
+      <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginBottom: 8 }}>
+        Generate a conversation with AI
+      </Button>
       <div className="chat-messages" ref={messagesRef}>
         {messages.map((msg, idx) => {
           const av = getAvatar(msg.from);
@@ -296,10 +325,10 @@ const ChatConversationPage: React.FC = () => {
           let startY = 0;
           let timer: NodeJS.Timeout;
           return (
-            <div
-              id={`msg-${msg.id}`}
-              key={msg.id}
-              className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
+            <React.Fragment key={msg.id}>
+              <div
+                id={`msg-${msg.id}`}
+                className={`message-item ${me ? 'me' : ''} ${swipeId === msg.id ? 'swipe' : ''}`}
               onContextMenu={(e) => {
                 e.preventDefault();
                 setMenuId(msg.id);
@@ -328,17 +357,21 @@ const ChatConversationPage: React.FC = () => {
               }}
             >
               {idx > 0 && (
-                <>
-                  <button
+                <span
+                  className={`delay-wrapper ${me ? 'left' : 'right'}`}
+                  onClick={() =>
+                    setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
+                  }
+                >
+                  <IconButton
                     className="delay-btn"
-                    onClick={() =>
-                      setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
-                    }
+                    size="small"
+                    onMouseDown={(e) => e.stopPropagation()}
                   >
-                    +
-                  </button>
+                    <TimerIcon fontSize="inherit" />
+                  </IconButton>
                   {delayMenuId === msg.id && (
-                    <div className="message-menu">
+                    <div className={`message-menu ${me ? 'left' : 'right'}`}>
                       {[1, 2, 3, 5].map((m) => (
                         <button
                           key={m}
@@ -349,7 +382,7 @@ const ChatConversationPage: React.FC = () => {
                       ))}
                     </div>
                   )}
-                </>
+                </span>
               )}
               {!me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               <div className="message-bubble" style={{ backgroundColor: av.color }}>
@@ -378,7 +411,8 @@ const ChatConversationPage: React.FC = () => {
                 )}
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
-            </div>
+              </div>
+            </React.Fragment>
           );
         })}
       </div>
@@ -446,6 +480,15 @@ const ChatConversationPage: React.FC = () => {
           aria-label="show-json"
         >
           <CodeIcon />
+        </IconButton>
+
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleGenerateAI}
+          color="primary"
+          aria-label="generate-ai"
+        >
+          <SmartToyIcon />
         </IconButton>
 
         <IconButton
