@@ -223,6 +223,18 @@
   font-weight: bold;
 }
 
+.instruction-text {
+  text-align: center;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.generate-btn {
+  background-color: #1976d2;
+  color: #fff;
+}
+
 .inbox-header {
   display: flex;
   justify-content: space-between;

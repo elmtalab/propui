@@ -17,6 +17,7 @@
     "@types/react-dom": "^18.3.7",
     "react": "^18.2.0",
     "react-chat-elements": "^12.0.18",
+    "react-datetime-picker": "^6.0.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.30.1",
     "react-scripts": "5.0.1",
