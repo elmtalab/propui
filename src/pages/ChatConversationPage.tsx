@@ -71,7 +71,6 @@ const ChatConversationPage: React.FC = () => {
  const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [menuId, setMenuId] = useState<number | null>(null);
-  const [menuBelow, setMenuBelow] = useState(true);
   const [swipeId, setSwipeId] = useState<number | null>(null);
   const [dragState, setDragState] = useState<{ id: number | null; dx: number }>(
     { id: null, dx: 0 }
@@ -154,6 +153,9 @@ const handleSend = () => {
     scrollToMessage(targetId);
     setTimeout(scrollToBottomIfNeeded, 100);
     setInputFocused(true);
+
+  const handleBlur = () => {
+    setInputFocused(false);
   };
 
   const handleBlur = () => {
@@ -430,12 +432,9 @@ const handleInputChange = (
                   startY = e.clientY;
                   dragging = true;
                   moved = false;
-                  const target = e.currentTarget as HTMLDivElement;
                   setDragState({ id: msg.id, dx: 0 });
                   timer = setTimeout(() => {
                     if (!moved) {
-                      const rect = target.getBoundingClientRect();
-                      setMenuBelow(rect.bottom < window.innerHeight - 50);
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
@@ -476,12 +475,9 @@ const handleInputChange = (
                   startY = e.touches[0].clientY;
                   dragging = true;
                   moved = false;
-                  const target = e.currentTarget as HTMLDivElement;
                   setDragState({ id: msg.id, dx: 0 });
                   timer = setTimeout(() => {
                     if (!moved) {
-                      const rect = target.getBoundingClientRect();
-                      setMenuBelow(rect.bottom < window.innerHeight - 50);
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
@@ -522,9 +518,7 @@ const handleInputChange = (
                 </div>
                 {menuId === msg.id && (
                   <div
-                    className={`message-menu ${me ? 'left' : 'right'} ${
-                      menuBelow ? 'below' : ''
-                    }`}
+                    className="message-menu"
                     onMouseDown={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >

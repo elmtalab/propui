@@ -74,7 +74,7 @@
 
 .message-menu {
   position: absolute;
-  bottom: calc(100% + 4px);
+  top: -32px;
   right: 0;
   display: flex;
   flex-direction: column;
@@ -91,10 +91,6 @@
 }
 .message-menu.right {
   right: 0;
-}
-.message-menu.below {
-  bottom: auto;
-  top: calc(100% + 4px);
 }
 
 .message-menu button {
