@@ -3,6 +3,8 @@ import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
 import TimerIcon from '@mui/icons-material/Timer';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -72,6 +74,7 @@ const ChatConversationPage: React.FC = () => {
   const conversationStartRef = useRef<string>(initialStart.toISOString());
 
   const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
+  const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
 
   const scrollToMessage = (msgId: number | undefined) => {
@@ -145,6 +148,7 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleAddDelay = (id: number, minutes: number) => {
+    skipScrollRef.current = true;
     setMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
     );
@@ -256,7 +260,11 @@ const ChatConversationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottomIfNeeded();
+    if (skipScrollRef.current) {
+      skipScrollRef.current = false;
+    } else {
+      scrollToBottomIfNeeded();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -306,6 +314,9 @@ const ChatConversationPage: React.FC = () => {
       <div className="start-time-inputs" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
         <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
       </div>
+      <Button className="generate-btn" onClick={handleGenerateAI} fullWidth style={{ marginBottom: 8 }}>
+        Generate a conversation with AI
+      </Button>
       <div className="chat-messages" ref={messagesRef}>
         {messages.map((msg, idx) => {
           const av = getAvatar(msg.from);
@@ -403,11 +414,7 @@ const ChatConversationPage: React.FC = () => {
               </div>
               {me && <img className="message-avatar" src={av.avatar} alt={msg.from} />}
               </div>
-              {idx === midIndex - 1 && (
-                <div className="instruction-text" style={{ margin: '8px 0' }}>
-                  You are creating messages. The AI will execute these messages.
-                </div>
-              )}
+
             </React.Fragment>
           );
         })}
@@ -476,6 +483,15 @@ const ChatConversationPage: React.FC = () => {
           aria-label="show-json"
         >
           <CodeIcon />
+        </IconButton>
+
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleGenerateAI}
+          color="primary"
+          aria-label="generate-ai"
+        >
+          <SmartToyIcon />
         </IconButton>
 
         <IconButton
