@@ -87,6 +87,9 @@ const ChatConversationPage: React.FC = () => {
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number>(
+    typeof window !== 'undefined' ? window.innerHeight : 0
+  );
 
 
   const scrollToMessage = (msgId: number | undefined) => {
@@ -153,9 +156,6 @@ const handleSend = () => {
     scrollToMessage(targetId);
     setTimeout(scrollToBottomIfNeeded, 100);
     setInputFocused(true);
-
-  const handleBlur = () => {
-    setInputFocused(false);
   };
 
   const handleBlur = () => {
@@ -320,11 +320,22 @@ const handleInputChange = (
 
   useEffect(() => {
     const handleResize = () => {
+      setViewportHeight(window.innerHeight);
       setTimeout(scrollToBottomIfNeeded, 100);
-
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const viewport = (window as any).visualViewport;
+    if (viewport) {
+      viewport.addEventListener('resize', handleResize);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+    return () => {
+      if (viewport) {
+        viewport.removeEventListener('resize', handleResize);
+      } else {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
   }, []);
 
 
@@ -334,7 +345,7 @@ const handleInputChange = (
       style={{
         paddingBottom: 80,
         position: 'relative',
-        height: '100dvh',
+        height: viewportHeight,
         display: 'flex',
         flexDirection: 'column',
       }}
