@@ -389,11 +389,7 @@ const ChatConversationPage: React.FC = () => {
               <div
                 className="message-bubble"
                 style={{ backgroundColor: av.color }}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setMenuId(msg.id);
-                  navigator.vibrate?.(50);
-                }}
+
                 onMouseDown={(e) => {
                   if (e.button !== 0) return;
                   startX = e.clientX;
@@ -406,7 +402,8 @@ const ChatConversationPage: React.FC = () => {
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
-                  }, 600);
+                  }, 500);
+
                 }}
                 onMouseMove={(e) => {
                   if (!dragging || dragState.id !== msg.id) return;
@@ -448,7 +445,8 @@ const ChatConversationPage: React.FC = () => {
                       setMenuId(msg.id);
                       navigator.vibrate?.(50);
                     }
-                  }, 600);
+                  }, 500);
+
                 }}
                 onTouchMove={(e) => {
                   if (!dragging || dragState.id !== msg.id) return;
