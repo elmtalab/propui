@@ -83,6 +83,7 @@ const ChatConversationPage: React.FC = () => {
   const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
 
   const scrollToMessage = (msgId: number | undefined) => {
     if (!msgId) return;
@@ -142,7 +143,12 @@ const ChatConversationPage: React.FC = () => {
     const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
     scrollToMessage(targetId);
     setTimeout(scrollToBottomIfNeeded, 100);
+    setInputFocused(true);
 
+  };
+
+  const handleBlur = () => {
+    setInputFocused(false);
   };
 
   const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
@@ -516,7 +522,22 @@ const ChatConversationPage: React.FC = () => {
           );
         })}
       </div>
-      <div className="message-input-container">
+      {replyTo && (
+        <div className="reply-preview-wrapper">
+          <div className="reply-preview">
+            <span>Replying to: {replyTo.text}</span>
+            <span
+              className="cancel-reply"
+              role="button"
+              aria-label="cancel reply"
+              onClick={() => setReplyTo(null)}
+            >
+              ×
+            </span>
+          </div>
+        </div>
+      )}
+      <div className={`message-input-container ${inputFocused ? 'focused' : ''}`}>
         <div style={{ position: 'relative' }}>
           <img
             src={selectedAvatar.avatar}
@@ -540,20 +561,7 @@ const ChatConversationPage: React.FC = () => {
             </div>
           )}
         </div>
-       <div style={{ flex: 1 }}>
-          {replyTo && (
-            <div className="reply-preview">
-              <span>Replying to: {replyTo.text}</span>
-              <span
-                className="cancel-reply"
-                role="button"
-                aria-label="cancel reply"
-                onClick={() => setReplyTo(null)}
-              >
-                ×
-              </span>
-            </div>
-          )}
+      <div style={{ flex: 1 }}>
           {editingId !== null && (
             <div className="reply-preview">Editing message</div>
           )}
@@ -575,6 +583,7 @@ const ChatConversationPage: React.FC = () => {
               }
             }}
             onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder="Type here..."
             style={{ resize: 'none', overflow: 'hidden' }}
           />
@@ -599,6 +608,7 @@ const ChatConversationPage: React.FC = () => {
         </IconButton>
 
         <IconButton
+          className="send-button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleSend}
           color="primary"
