@@ -574,10 +574,14 @@ const handleInputChange = (
               <PaginationItem
                 {...item}
                 onClick={() => {
-                  const idx = item.page - 1;
-                  if (idx !== conversationIndex) {
-                    setTransitionDir(idx > conversationIndex ? 'left' : 'right');
-                    setConversationIndex(idx);
+                  if (item.page != null) {
+                    const idx = item.page - 1;
+                    if (idx !== conversationIndex) {
+                      setTransitionDir(
+                        idx > conversationIndex ? 'left' : 'right'
+                      );
+                      setConversationIndex(idx);
+                    }
                   }
                 }}
               />
