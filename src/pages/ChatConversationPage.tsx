@@ -109,8 +109,6 @@ const ChatConversationPage: React.FC = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const pageGestureRef = useRef({ startX: 0, startY: 0, dx: 0, dragging: false });
-  const [pageDragX, setPageDragX] = useState(0);
 
 
   const currentConversation = conversations[conversationIndex];
@@ -200,10 +198,10 @@ const handleSend = () => {
     setEditingId(null);
     setReplyTo(null);
     scrollToBottomIfNeeded();
-    setInputFocused(false);
+    setInputFocused(true);
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
-      inputRef.current.blur();
+      inputRef.current.focus();
     }
 };
 
@@ -406,115 +404,15 @@ const handleInputChange = (
         flexDirection: 'column',
         boxSizing: 'border-box',
         width: '100%',
-        transform: `translateX(${pageDragX}px)`,
-        transition: pageGestureRef.current.dragging ? 'none' : 'transform 0.3s',
+        transform: 'none',
+        transition: 'none',
+
       }}
       onClick={() => {
         setMenuId(null);
         setMenuPosition(null);
       }}
-      onTouchStart={(e) => {
-        const g = pageGestureRef.current;
-        g.startX = e.touches[0].clientX;
-        g.startY = e.touches[0].clientY;
-        g.dx = 0;
-        g.dragging = true;
-        setPageDragX(0);
-      }}
-      onTouchMove={(e) => {
-        const g = pageGestureRef.current;
-        if (!g.dragging) return;
-        g.dx = e.touches[0].clientX - g.startX;
-        setPageDragX(g.dx);
-      }}
-      onTouchCancel={() => {
-        const g = pageGestureRef.current;
-        g.dragging = false;
-        setPageDragX(0);
-
-      }}
-      onTouchEnd={(e) => {
-        const g = pageGestureRef.current;
-        if (!g.dragging) return;
-        const dx = e.changedTouches[0].clientX - g.startX;
-        const dy = e.changedTouches[0].clientY - g.startY;
-        g.dragging = false;
-        setPageDragX(0);
-
-        if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
-          if (dx < 0) {
-            if (conversationIndex === conversations.length - 1) {
-              setConversations((prev) => [
-                ...prev,
-                {
-                  id: `conv-${Math.random().toString(36).slice(2, 10)}`,
-                  startDateTime: new Date(),
-                  messages: [],
-                },
-              ]);
-              setConversationIndex((i) => i + 1);
-            } else {
-              setConversationIndex((i) => i + 1);
-            }
-            setTransitionDir('left');
-          } else if (dx > 0 && conversationIndex > 0) {
-            setConversationIndex((i) => i - 1);
-            setTransitionDir('right');
-
-          }
-        }
-      }}
-      onMouseDown={(e) => {
-        const g = pageGestureRef.current;
-        g.startX = e.clientX;
-        g.startY = e.clientY;
-        g.dx = 0;
-        g.dragging = true;
-        setPageDragX(0);
-      }}
-      onMouseMove={(e) => {
-        const g = pageGestureRef.current;
-        if (!g.dragging) return;
-        g.dx = e.clientX - g.startX;
-        setPageDragX(g.dx);
-      }}
-      onMouseLeave={() => {
-        const g = pageGestureRef.current;
-        g.dragging = false;
-        setPageDragX(0);
-
-      }}
-      onMouseUp={(e) => {
-        const g = pageGestureRef.current;
-        if (!g.dragging) return;
-        const dx = e.clientX - g.startX;
-        const dy = e.clientY - g.startY;
-        g.dragging = false;
-        setPageDragX(0);
-
-        if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
-          if (dx < 0) {
-            if (conversationIndex === conversations.length - 1) {
-              setConversations((prev) => [
-                ...prev,
-                {
-                  id: `conv-${Math.random().toString(36).slice(2, 10)}`,
-                  startDateTime: new Date(),
-                  messages: [],
-                },
-              ]);
-              setConversationIndex((i) => i + 1);
-            } else {
-              setConversationIndex((i) => i + 1);
-            }
-            setTransitionDir('left');
-          } else if (dx > 0 && conversationIndex > 0) {
-            setConversationIndex((i) => i - 1);
-            setTransitionDir('right');
-
-          }
-        }
-      }}
+      
     >
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
