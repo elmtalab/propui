@@ -26,6 +26,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -369,7 +370,11 @@ const ChatInboxPage: React.FC = () => {
       <DialogTitle>System Prompt</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div>
-            <div style={{ fontSize: 14, marginBottom: 4 }}>What should ChatGPT call you?</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, marginBottom: 4 }}>
+              <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              What should Penemue call you?
+            </div>
+
             <TextField
               label="Nickname"
               value={systemPrompt.displayName}
@@ -378,7 +383,11 @@ const ChatInboxPage: React.FC = () => {
             />
           </div>
           <div>
-            <div style={{ fontSize: 14, marginBottom: 4 }}>What do you do?</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, marginBottom: 4 }}>
+              <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              What do you do?
+            </div>
+
             <TextField
               label="Occupation"
               value={systemPrompt.occupation}
@@ -387,7 +396,11 @@ const ChatInboxPage: React.FC = () => {
             />
           </div>
           <div>
-            <div style={{ fontSize: 14, marginBottom: 4 }}>What traits should ChatGPT have?</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, marginBottom: 4 }}>
+              <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              What traits should Penemue have?
+            </div>
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
               {systemPrompt.assistantTraits.map((t) => (
                 <Chip key={t} label={t} onDelete={() => handleDeleteTrait(t)} />
@@ -407,7 +420,11 @@ const ChatInboxPage: React.FC = () => {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 14, marginBottom: 4 }}>Anything else ChatGPT should know about you?</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, marginBottom: 4 }}>
+              <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              Anything else Penemue should know about you?
+            </div>
+
             <TextField
               label="Extra context"
               value={systemPrompt.extraContext}
