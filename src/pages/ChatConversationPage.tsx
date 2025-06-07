@@ -702,7 +702,8 @@ const handleInputChange = (
 
       <SpeedDial
         ariaLabel="chat actions"
-        icon={<SpeedDialIcon />}
+       icon={<SpeedDialIcon />}
+
         open={speedDialOpen}
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
