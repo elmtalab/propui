@@ -83,6 +83,7 @@ const ChatConversationPage: React.FC = () => {
   const [conversationIndex, setConversationIndex] = useState(0);
   const [transitionDir, setTransitionDir] = useState<'left' | 'right' | null>(null);
 
+
   const [text, setText] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
   const [showAvatars, setShowAvatars] = useState(false);
@@ -289,6 +290,7 @@ const handleSend = () => {
         };
       });
 
+
       return {
         conversation_id: conv.id,
         start_time: conv.startDateTime.toISOString(),
@@ -308,6 +310,7 @@ const handleSend = () => {
       role: 'member',
       status: 'active',
       joined_at: conversations[0].startDateTime.toISOString(),
+
     }));
 
     return {
@@ -328,6 +331,7 @@ const handleSend = () => {
           group_description: '',
           members,
           conversations: conversationsJson,
+
         },
       ],
       ai_users: [],
@@ -362,6 +366,7 @@ const handleInputChange = (
       return () => clearTimeout(t);
     }
   }, [transitionDir]);
+
 
   useEffect(() => {
     if (replyTo) {
@@ -429,6 +434,7 @@ const handleInputChange = (
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
             setTransitionDir('right');
+
           }
         }
       }}
@@ -463,6 +469,7 @@ const handleInputChange = (
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
             setTransitionDir('right');
+
           }
         }
       }}
