@@ -172,7 +172,7 @@
   line-height: 1.4;
   transition: width 0.3s;
  max-height: 20vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
 

@@ -351,8 +351,6 @@ const handleInputChange = (
   e: React.ChangeEvent<HTMLTextAreaElement>
 ) => {
   setText(e.target.value);
-  const targetId = replyTo?.id ?? messages[messages.length - 1]?.id;
-  scrollToMessage(targetId);
 
   const target = e.target as HTMLTextAreaElement;
   target.style.height = 'auto';
@@ -858,7 +856,7 @@ const handleInputChange = (
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder="Type here..."
-            style={{ resize: 'none', overflow: 'auto' }}
+            style={{ resize: 'none', overflow: 'hidden' }}
           />
         </div>
 
