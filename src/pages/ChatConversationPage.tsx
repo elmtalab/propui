@@ -81,6 +81,8 @@ const ChatConversationPage: React.FC = () => {
     },
   ]);
   const [conversationIndex, setConversationIndex] = useState(0);
+  const [transitionDir, setTransitionDir] = useState<'left' | 'right' | null>(null);
+
 
   const [text, setText] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
@@ -263,39 +265,53 @@ const handleSend = () => {
   };
 
   const generateJSON = () => {
-    let cumulative = 0;
-    const start = startDateTime.getTime();
-    const msgs = messages.map((m, idx) => {
-      if (idx > 0) {
-        cumulative += m.delay;
-      }
-      const timestamp = new Date(start + cumulative * 60000).toISOString();
-      const relative = idx === 0 ? 0 : m.delay * 60;
+    const conversationsJson = conversations.map((conv) => {
+      let cumulative = 0;
+      const start = conv.startDateTime.getTime();
+      const msgs = conv.messages.map((m, idx) => {
+        if (idx > 0) {
+          cumulative += m.delay;
+        }
+        const timestamp = new Date(start + cumulative * 60000).toISOString();
+        const relative = idx === 0 ? 0 : m.delay * 60;
+
+        return {
+          message_id: `m-${m.id}`,
+          sender_id: m.from,
+          sender_name: m.from,
+          message_content: m.text,
+          message_type: 'text',
+          timestamp,
+          relative_time: relative,
+          status: 'pending',
+          metadata: {
+            language: 'en',
+          },
+        };
+      });
+
 
       return {
-        message_id: `m-${m.id}`,
-        sender_id: m.from,
-        sender_name: m.from,
-        message_content: m.text,
-        message_type: 'text',
-        timestamp,
-
-        relative_time: relative,
-        status: 'pending',
-        metadata: {
-          language: 'en',
-        },
+        conversation_id: conv.id,
+        start_time: conv.startDateTime.toISOString(),
+        initiated_by: conv.messages[0]?.from || selectedAvatar.id,
+        topic: '',
+        conversation_metadata: { active: true, tags: [] },
+        messages: msgs,
       };
     });
 
-    const members = Array.from(new Set(messages.map((m) => m.from))).map((u) => ({
+    const memberSet = new Set(
+      conversations.flatMap((c) => c.messages.map((m) => m.from))
+    );
+    const members = Array.from(memberSet).map((u) => ({
       telegram_user_id: u,
       telegram_user_name: u,
       role: 'member',
       status: 'active',
-      joined_at: startDateTime.toISOString(),
-    }));
+      joined_at: conversations[0].startDateTime.toISOString(),
 
+    }));
 
     return {
       system_metadata: {
@@ -314,17 +330,8 @@ const handleSend = () => {
           created_by: 123456789,
           group_description: '',
           members,
+          conversations: conversationsJson,
 
-          conversations: [
-            {
-              conversation_id: currentConversation.id,
-              start_time: startDateTime.toISOString(),
-              initiated_by: selectedAvatar.id,
-              topic: '',
-              conversation_metadata: { active: true, tags: [] },
-              messages: msgs,
-            },
-          ],
         },
       ],
       ai_users: [],
@@ -352,6 +359,14 @@ const handleInputChange = (
       scrollToBottomIfNeeded();
     }
   }, [conversations, conversationIndex]);
+
+  useEffect(() => {
+    if (transitionDir) {
+      const t = setTimeout(() => setTransitionDir(null), 350);
+      return () => clearTimeout(t);
+    }
+  }, [transitionDir]);
+
 
   useEffect(() => {
     if (replyTo) {
@@ -415,8 +430,11 @@ const handleInputChange = (
             } else {
               setConversationIndex((i) => i + 1);
             }
+            setTransitionDir('left');
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
+            setTransitionDir('right');
+
           }
         }
       }}
@@ -447,8 +465,11 @@ const handleInputChange = (
             } else {
               setConversationIndex((i) => i + 1);
             }
+            setTransitionDir('left');
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
+            setTransitionDir('right');
+
           }
         }
       }}
@@ -461,6 +482,22 @@ const handleInputChange = (
           alt={id}
         />
         <span className="header-name">{id}</span>
+      </div>
+      <div className="conversation-nav">
+        {conversations.map((c, idx) => (
+          <button
+            key={c.id}
+            className={idx === conversationIndex ? 'active' : ''}
+            onClick={() => {
+              if (idx !== conversationIndex) {
+                setTransitionDir(idx > conversationIndex ? 'left' : 'right');
+                setConversationIndex(idx);
+              }
+            }}
+          >
+            {idx + 1}
+          </button>
+        ))}
       </div>
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
@@ -488,7 +525,12 @@ const handleInputChange = (
           </>
         )}
       </Button>
-      <div className="chat-messages" ref={messagesRef}>
+      <div
+        className={`chat-messages ${
+          transitionDir ? `animate-${transitionDir}` : ''
+        }`}
+        ref={messagesRef}
+      >
         {messages.map((msg, idx) => {
           const av = getAvatar(msg.from);
           const me = msg.from === selectedAvatar.id;
