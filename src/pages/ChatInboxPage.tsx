@@ -25,7 +25,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -374,6 +374,7 @@ const ChatInboxPage: React.FC = () => {
               <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
               What should Penemue call you?
             </div>
+
             <TextField
               label="Nickname"
               value={systemPrompt.displayName}
@@ -386,6 +387,7 @@ const ChatInboxPage: React.FC = () => {
               <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
               What do you do?
             </div>
+
             <TextField
               label="Occupation"
               value={systemPrompt.occupation}
@@ -398,6 +400,7 @@ const ChatInboxPage: React.FC = () => {
               <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
               What traits should Penemue have?
             </div>
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
               {systemPrompt.assistantTraits.map((t) => (
                 <Chip key={t} label={t} onDelete={() => handleDeleteTrait(t)} />
@@ -421,6 +424,7 @@ const ChatInboxPage: React.FC = () => {
               <InfoOutlinedIcon sx={{ fontSize: 16, mr: 0.5 }} />
               Anything else Penemue should know about you?
             </div>
+
             <TextField
               label="Extra context"
               value={systemPrompt.extraContext}
