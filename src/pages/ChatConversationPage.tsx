@@ -406,6 +406,7 @@ const handleInputChange = (
         width: '100%',
         transform: 'none',
         transition: 'none',
+
       }}
       onClick={() => {
         setMenuId(null);
