@@ -10,6 +10,14 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CircularProgress from '@mui/material/CircularProgress';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 // SpeedDial features moved to ChatInboxPage
 import Dialog from '@mui/material/Dialog';
@@ -88,6 +96,26 @@ const ChatConversationPage: React.FC = () => {
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [promptDialogOpen, setPromptDialogOpen] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState({
+    displayName: '',
+    occupation: '',
+    assistantTraits: '',
+    extraContext: '',
+  });
+
+  const handleToggleGroup = (group: string) => {
+    setSelectedGroups((prev) =>
+      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
+    );
+  };
+
+  const handlePromptChange = (field: keyof typeof systemPrompt, value: string) => {
+    setSystemPrompt((prev) => ({ ...prev, [field]: value }));
+  };
 
   const gestureRef = useRef({
     startX: 0,
@@ -668,6 +696,7 @@ const handleInputChange = (
           <Button onClick={() => setJsonOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
 
     </div>
   );
