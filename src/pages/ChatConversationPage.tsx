@@ -50,6 +50,12 @@ interface Message {
   replyTo?: number;
 }
 
+interface Conversation {
+  id: string;
+  startDateTime: Date;
+  messages: Message[];
+}
+
 const initialMessages: Record<string, Message[]> = {
   kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0 }],
   emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0 }],
@@ -65,11 +71,21 @@ const initialMessages: Record<string, Message[]> = {
 
 const ChatConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<Message[]>(initialMessages[id ?? ''] || []);
+
+  const initialStart = new Date();
+  const [conversations, setConversations] = useState<Conversation[]>([
+    {
+      id: `conv-${Math.random().toString(36).slice(2, 10)}`,
+      startDateTime: initialStart,
+      messages: initialMessages[id ?? ''] || [],
+    },
+  ]);
+  const [conversationIndex, setConversationIndex] = useState(0);
+
   const [text, setText] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
   const [showAvatars, setShowAvatars] = useState(false);
- const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [menuId, setMenuId] = useState<number | null>(null);
   const [swipeId, setSwipeId] = useState<number | null>(null);
@@ -79,15 +95,36 @@ const ChatConversationPage: React.FC = () => {
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const initialStart = new Date();
-  const [startDateTime, setStartDateTime] = useState<Date>(initialStart);
-  const conversationStartRef = useRef<string>(initialStart.toISOString());
 
-  const conversationIdRef = useRef<string>(`conv-${Math.random().toString(36).slice(2, 10)}`);
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  const pageGestureRef = useRef({ startX: 0, startY: 0, dragging: false });
+
+  const currentConversation = conversations[conversationIndex];
+  const messages = currentConversation.messages;
+  const startDateTime = currentConversation.startDateTime;
+
+  const updateMessages = (updater: (prev: Message[]) => Message[]) => {
+    setConversations((prev) => {
+      const next = [...prev];
+      next[conversationIndex] = {
+        ...next[conversationIndex],
+        messages: updater(next[conversationIndex].messages),
+      };
+      return next;
+    });
+  };
+
+  const updateStartDateTime = (dt: Date) => {
+    setConversations((prev) => {
+      const next = [...prev];
+      next[conversationIndex] = { ...next[conversationIndex], startDateTime: dt };
+      return next;
+    });
+  };
 
   const gestureRef = useRef({
     startX: 0,
@@ -117,7 +154,7 @@ const ChatConversationPage: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    setMessages((prev) => prev.filter((m) => m.id !== id));
+    updateMessages((prev) => prev.filter((m) => m.id !== id));
     setMenuId(null);
     setMenuPosition(null);
   };
@@ -133,22 +170,22 @@ const ChatConversationPage: React.FC = () => {
 
 const handleSend = () => {
   if (!text.trim()) return;
-  setMessages((prev) => {
-      if (editingId !== null) {
-        return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
-      }
-      const newId = prev.length ? prev[prev.length - 1].id + 1 : 1;
-      return [
-        ...prev,
-        {
-          id: newId,
-          from: selectedAvatar.id,
-          text,
-          delay: 0,
-          replyTo: replyTo?.id,
-        },
-      ];
-    });
+  updateMessages((prev) => {
+    if (editingId !== null) {
+      return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
+    }
+    const newId = prev.length ? prev[prev.length - 1].id + 1 : 1;
+    return [
+      ...prev,
+      {
+        id: newId,
+        from: selectedAvatar.id,
+        text,
+        delay: 0,
+        replyTo: replyTo?.id,
+      },
+    ];
+  });
     setText('');
     setEditingId(null);
     setReplyTo(null);
@@ -185,7 +222,7 @@ const handleSend = () => {
 
   const handleAddDelay = (id: number, minutes: number) => {
     skipScrollRef.current = true;
-    setMessages((prev) =>
+    updateMessages((prev) =>
       prev.map((m) => (m.id === id ? { ...m, delay: m.delay + minutes } : m))
     );
     setDelayMenuId(null);
@@ -193,13 +230,13 @@ const handleSend = () => {
 
   const handleResetDelay = (id: number) => {
     skipScrollRef.current = true;
-    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, delay: 0 } : m)));
+    updateMessages((prev) => prev.map((m) => (m.id === id ? { ...m, delay: 0 } : m)));
     setDelayMenuId(null);
   };
 
   const handleGenerateAI = () => {
     setGenerating(true);
-    setMessages((prev) => {
+    updateMessages((prev) => {
       const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       const generated: Message[] = [];
       for (let i = 0; i < 10; i++) {
@@ -222,14 +259,12 @@ const handleSend = () => {
     for (let i = 1; i <= index; i++) {
       total += messages[i].delay;
     }
-    return new Date(
-      new Date(conversationStartRef.current).getTime() + total * 60000
-    ).toISOString();
+    return new Date(startDateTime.getTime() + total * 60000).toISOString();
   };
 
   const generateJSON = () => {
     let cumulative = 0;
-    const start = new Date(conversationStartRef.current).getTime();
+    const start = startDateTime.getTime();
     const msgs = messages.map((m, idx) => {
       if (idx > 0) {
         cumulative += m.delay;
@@ -258,7 +293,7 @@ const handleSend = () => {
       telegram_user_name: u,
       role: 'member',
       status: 'active',
-      joined_at: conversationStartRef.current,
+      joined_at: startDateTime.toISOString(),
     }));
 
 
@@ -282,8 +317,8 @@ const handleSend = () => {
 
           conversations: [
             {
-              conversation_id: conversationIdRef.current,
-              start_time: conversationStartRef.current,
+              conversation_id: currentConversation.id,
+              start_time: startDateTime.toISOString(),
               initiated_by: selectedAvatar.id,
               topic: '',
               conversation_metadata: { active: true, tags: [] },
@@ -316,7 +351,7 @@ const handleInputChange = (
     } else {
       scrollToBottomIfNeeded();
     }
-  }, [messages]);
+  }, [conversations, conversationIndex]);
 
   useEffect(() => {
     if (replyTo) {
@@ -325,8 +360,9 @@ const handleInputChange = (
   }, [replyTo]);
 
   useEffect(() => {
-    conversationStartRef.current = startDateTime.toISOString();
-  }, [startDateTime]);
+    scrollToBottomIfNeeded();
+  }, [conversationIndex]);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -352,6 +388,70 @@ const handleInputChange = (
         setMenuId(null);
         setMenuPosition(null);
       }}
+      onTouchStart={(e) => {
+        const g = pageGestureRef.current;
+        g.startX = e.touches[0].clientX;
+        g.startY = e.touches[0].clientY;
+        g.dragging = true;
+      }}
+      onTouchEnd={(e) => {
+        const g = pageGestureRef.current;
+        if (!g.dragging) return;
+        const dx = e.changedTouches[0].clientX - g.startX;
+        const dy = e.changedTouches[0].clientY - g.startY;
+        g.dragging = false;
+        if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
+          if (dx < 0) {
+            if (conversationIndex === conversations.length - 1) {
+              setConversations((prev) => [
+                ...prev,
+                {
+                  id: `conv-${Math.random().toString(36).slice(2, 10)}`,
+                  startDateTime: new Date(),
+                  messages: [],
+                },
+              ]);
+              setConversationIndex((i) => i + 1);
+            } else {
+              setConversationIndex((i) => i + 1);
+            }
+          } else if (dx > 0 && conversationIndex > 0) {
+            setConversationIndex((i) => i - 1);
+          }
+        }
+      }}
+      onMouseDown={(e) => {
+        const g = pageGestureRef.current;
+        g.startX = e.clientX;
+        g.startY = e.clientY;
+        g.dragging = true;
+      }}
+      onMouseUp={(e) => {
+        const g = pageGestureRef.current;
+        if (!g.dragging) return;
+        const dx = e.clientX - g.startX;
+        const dy = e.clientY - g.startY;
+        g.dragging = false;
+        if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
+          if (dx < 0) {
+            if (conversationIndex === conversations.length - 1) {
+              setConversations((prev) => [
+                ...prev,
+                {
+                  id: `conv-${Math.random().toString(36).slice(2, 10)}`,
+                  startDateTime: new Date(),
+                  messages: [],
+                },
+              ]);
+              setConversationIndex((i) => i + 1);
+            } else {
+              setConversationIndex((i) => i + 1);
+            }
+          } else if (dx > 0 && conversationIndex > 0) {
+            setConversationIndex((i) => i - 1);
+          }
+        }
+      }}
     >
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
@@ -370,7 +470,7 @@ const handleInputChange = (
         style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
       >
         <span style={{ fontSize: 14 }}>Executed at</span>
-        <DateTimePicker onChange={(d) => d && setStartDateTime(d)} value={startDateTime} />
+        <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
       </div>
       <Button
         className="generate-btn"
