@@ -416,19 +416,12 @@ const handleInputChange = (
     >
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
-        <img
-          src={getAvatar(id ?? '').avatar}
-          className="header-avatar"
-          alt={id}
-        />
-        <span className="header-name">{id}</span>
-      </div>
-      <div className="conversation-nav">
-        <Pagination
-          count={conversations.length}
-          page={conversationIndex + 1}
-          renderItem={(item) => {
-            if (item.type === 'previous') {
+        <div className="conversation-nav">
+          <Pagination
+            count={conversations.length}
+            page={conversationIndex + 1}
+            renderItem={(item) => {
+              if (item.type === 'previous') {
               return (
                 <PaginationItem
                   {...item}
@@ -486,7 +479,13 @@ const handleInputChange = (
             );
           }}
         />
-
+        </div>
+        <img
+          src={getAvatar(id ?? '').avatar}
+          className="header-avatar"
+          alt={id}
+        />
+        <span className="header-name">{id}</span>
       </div>
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
@@ -498,22 +497,6 @@ const handleInputChange = (
         <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
       </div>
-      <Button
-        className="generate-btn"
-        onClick={handleGenerateAI}
-        disabled={generating}
-        fullWidth
-        style={{ marginBottom: 8 }}
-      >
-        {generating ? (
-          <CircularProgress size={20} color="inherit" />
-        ) : (
-          <>
-            <AutoAwesomeIcon style={{ marginRight: 4 }} />
-            Generate a conversation with AI
-          </>
-        )}
-      </Button>
       <div
         className={`chat-messages ${
           transitionDir ? `animate-${transitionDir}` : ''
