@@ -14,6 +14,7 @@ import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -22,6 +23,8 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Chip from '@mui/material/Chip';
+import AddIcon from '@mui/icons-material/Add';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -153,13 +156,16 @@ const ChatInboxPage: React.FC = () => {
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [promptDialogOpen, setPromptDialogOpen] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState({
     displayName: '',
     occupation: '',
-    assistantTraits: '',
+    assistantTraits: [] as string[],
     extraContext: '',
   });
+
+  const [traitInput, setTraitInput] = useState('');
 
   const handleToggleGroup = (group: string) => {
     setSelectedGroups((prev) =>
@@ -167,8 +173,28 @@ const ChatInboxPage: React.FC = () => {
     );
   };
 
-  const handlePromptChange = (field: keyof typeof systemPrompt, value: string) => {
+  const handlePromptChange = (
+    field: 'displayName' | 'occupation' | 'extraContext',
+    value: string
+  ) => {
     setSystemPrompt((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddTrait = () => {
+    const t = traitInput.trim();
+    if (!t) return;
+    setSystemPrompt((prev) => ({
+      ...prev,
+      assistantTraits: Array.from(new Set([...prev.assistantTraits, t])),
+    }));
+    setTraitInput('');
+  };
+
+  const handleDeleteTrait = (trait: string) => {
+    setSystemPrompt((prev) => ({
+      ...prev,
+      assistantTraits: prev.assistantTraits.filter((t) => t !== trait),
+    }));
   };
 
 
@@ -263,30 +289,73 @@ const ChatInboxPage: React.FC = () => {
             setPromptDialogOpen(true);
           }}
         />
+        <SpeedDialAction
+          icon={<SmartToyIcon />}
+          tooltipTitle="Auto Chat"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            if (!systemPrompt.displayName && !systemPrompt.occupation) {
+              setPromptDialogOpen(true);
+            } else {
+              alert(
+                `Generating conversations for ${selectedGroups.join(', ') ||
+                  'selected groups'}...`
+              );
+            }
+          }}
+        />
       </SpeedDial>
 
       <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
         <DialogTitle>Select Groups</DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <TextField
+            placeholder="Search groups"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
           {Object.entries(groupCategories).map(([cat, groups]) => (
             <div key={cat} style={{ marginBottom: 8 }}>
               <div style={{ fontWeight: 'bold' }}>{cat}</div>
-              {groups.map((g) => (
-                <FormControlLabel
-                  key={g}
-                  control={
-                    <Checkbox
-                      checked={selectedGroups.includes(g)}
-                      onChange={() => handleToggleGroup(g)}
-                    />
-                  }
-                  label={g}
-                />
-              ))}
+              {groups
+                .filter((g) => g.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((g) => (
+                  <FormControlLabel
+                    key={g}
+                    control={
+                      <Checkbox
+                        checked={selectedGroups.includes(g)}
+                        onChange={() => handleToggleGroup(g)}
+                      />
+                    }
+                    label={g}
+                  />
+                ))}
             </div>
           ))}
+          {searchTerm &&
+            !Object.values(groupCategories).flat().some((g) => g === searchTerm) && (
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setSelectedGroups((prev) => [...prev, searchTerm]);
+                  setSearchTerm('');
+                }}
+              >
+                Add "{searchTerm}" as group
+              </Button>
+            )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ justifyContent: 'space-between' }}>
+          <Button
+            startIcon={<SmartToyIcon />}
+            onClick={() => alert('AI will select groups soon...')}
+          >
+            Choose groups by AI
+          </Button>
           <Button onClick={() => setGroupDialogOpen(false)}>Done</Button>
         </DialogActions>
       </Dialog>
@@ -297,34 +366,57 @@ const ChatInboxPage: React.FC = () => {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>System Prompt</DialogTitle>
+      <DialogTitle>System Prompt</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Nickname"
-            value={systemPrompt.displayName}
-            onChange={(e) => handlePromptChange('displayName', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="What do you do?"
-            value={systemPrompt.occupation}
-            onChange={(e) => handlePromptChange('occupation', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="AI traits"
-            value={systemPrompt.assistantTraits}
-            onChange={(e) => handlePromptChange('assistantTraits', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Anything else?"
-            value={systemPrompt.extraContext}
-            onChange={(e) => handlePromptChange('extraContext', e.target.value)}
-            fullWidth
-            multiline
-            rows={3}
-          />
+          <div>
+            <div style={{ fontSize: 14, marginBottom: 4 }}>What should ChatGPT call you?</div>
+            <TextField
+              label="Nickname"
+              value={systemPrompt.displayName}
+              onChange={(e) => handlePromptChange('displayName', e.target.value)}
+              fullWidth
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 14, marginBottom: 4 }}>What do you do?</div>
+            <TextField
+              label="Occupation"
+              value={systemPrompt.occupation}
+              onChange={(e) => handlePromptChange('occupation', e.target.value)}
+              fullWidth
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 14, marginBottom: 4 }}>What traits should ChatGPT have?</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
+              {systemPrompt.assistantTraits.map((t) => (
+                <Chip key={t} label={t} onDelete={() => handleDeleteTrait(t)} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <TextField
+                placeholder="Describe or select traits"
+                value={traitInput}
+                onChange={(e) => setTraitInput(e.target.value)}
+                fullWidth
+                size="small"
+              />
+              <IconButton onClick={handleAddTrait} color="primary">
+                <AddIcon />
+              </IconButton>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, marginBottom: 4 }}>Anything else ChatGPT should know about you?</div>
+            <TextField
+              label="Extra context"
+              value={systemPrompt.extraContext}
+              onChange={(e) => handlePromptChange('extraContext', e.target.value)}
+              fullWidth
+              multiline
+              rows={3}
+            />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPromptDialogOpen(false)}>Close</Button>
