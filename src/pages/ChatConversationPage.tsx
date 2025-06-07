@@ -59,8 +59,8 @@ const initialMessages: Record<string, Message[]> = {
   abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0 }],
   ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0 }],
 
-
 };
+
 
 const ChatConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -667,6 +667,7 @@ const handleInputChange = (
           <Button onClick={() => setJsonOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
     </div>
   );
 };
