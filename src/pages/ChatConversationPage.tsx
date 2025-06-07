@@ -8,8 +8,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CircularProgress from '@mui/material/CircularProgress';
 
 // SpeedDial features moved to ChatInboxPage
 import Dialog from '@mui/material/Dialog';
@@ -107,7 +105,6 @@ const ChatConversationPage: React.FC = () => {
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
-  const [generating, setGenerating] = useState(false);
 
 
 
@@ -243,7 +240,6 @@ const handleSend = () => {
   };
 
   const handleGenerateAI = () => {
-    setGenerating(true);
     updateMessages((prev) => {
       const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       const generated: Message[] = [];
@@ -259,7 +255,6 @@ const handleSend = () => {
       return [...prev, ...generated];
     });
     scrollToBottomIfNeeded();
-    setTimeout(() => setGenerating(false), 500);
   };
 
   const computeTimestamp = (index: number) => {
@@ -416,19 +411,12 @@ const handleInputChange = (
     >
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
-        <img
-          src={getAvatar(id ?? '').avatar}
-          className="header-avatar"
-          alt={id}
-        />
-        <span className="header-name">{id}</span>
-      </div>
-      <div className="conversation-nav">
-        <Pagination
-          count={conversations.length}
-          page={conversationIndex + 1}
-          renderItem={(item) => {
-            if (item.type === 'previous') {
+        <div className="conversation-nav">
+          <Pagination
+            count={conversations.length}
+            page={conversationIndex + 1}
+            renderItem={(item) => {
+              if (item.type === 'previous') {
               return (
                 <PaginationItem
                   {...item}
@@ -486,7 +474,13 @@ const handleInputChange = (
             );
           }}
         />
-
+        </div>
+        <img
+          src={getAvatar(id ?? '').avatar}
+          className="header-avatar"
+          alt={id}
+        />
+        <span className="header-name">{id}</span>
       </div>
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
@@ -498,22 +492,6 @@ const handleInputChange = (
         <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
       </div>
-      <Button
-        className="generate-btn"
-        onClick={handleGenerateAI}
-        disabled={generating}
-        fullWidth
-        style={{ marginBottom: 8 }}
-      >
-        {generating ? (
-          <CircularProgress size={20} color="inherit" />
-        ) : (
-          <>
-            <AutoAwesomeIcon style={{ marginRight: 4 }} />
-            Generate a conversation with AI
-          </>
-        )}
-      </Button>
       <div
         className={`chat-messages ${
           transitionDir ? `animate-${transitionDir}` : ''
