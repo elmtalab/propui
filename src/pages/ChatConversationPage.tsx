@@ -69,10 +69,6 @@ const initialMessages: Record<string, Message[]> = {
 
 };
 
-const groupCategories: Record<string, string[]> = {
-  Sports: ['Football Fans', 'Basketball Lovers'],
-  Movies: ['Sci-Fi Lovers', 'Comedy Club'],
-};
 
 const ChatConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -700,98 +696,7 @@ const handleInputChange = (
         </DialogActions>
       </Dialog>
 
-      <SpeedDial
-        ariaLabel="chat actions"
-       icon={<SpeedDialIcon />}
 
-        open={speedDialOpen}
-        onOpen={() => setSpeedDialOpen(true)}
-        onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'absolute', bottom: 16, right: 16 }}
-      >
-        <SpeedDialAction
-          icon={<GroupAddIcon />}
-          tooltipTitle="Add Group"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            setGroupDialogOpen(true);
-          }}
-        />
-        <SpeedDialAction
-          icon={<SettingsSuggestIcon />}
-          tooltipTitle="System Prompt"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            setPromptDialogOpen(true);
-          }}
-        />
-      </SpeedDial>
-
-      <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
-        <DialogTitle>Select Groups</DialogTitle>
-        <DialogContent dividers>
-          {Object.entries(groupCategories).map(([cat, groups]) => (
-            <div key={cat} style={{ marginBottom: 8 }}>
-              <div style={{ fontWeight: 'bold' }}>{cat}</div>
-              {groups.map((g) => (
-                <FormControlLabel
-                  key={g}
-                  control={
-                    <Checkbox
-                      checked={selectedGroups.includes(g)}
-                      onChange={() => handleToggleGroup(g)}
-                    />
-                  }
-                  label={g}
-                />
-              ))}
-            </div>
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setGroupDialogOpen(false)}>Done</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={promptDialogOpen}
-        onClose={() => setPromptDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>System Prompt</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Nickname"
-            value={systemPrompt.displayName}
-            onChange={(e) => handlePromptChange('displayName', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="What do you do?"
-            value={systemPrompt.occupation}
-            onChange={(e) => handlePromptChange('occupation', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="AI traits"
-            value={systemPrompt.assistantTraits}
-            onChange={(e) => handlePromptChange('assistantTraits', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Anything else?"
-            value={systemPrompt.extraContext}
-            onChange={(e) => handlePromptChange('extraContext', e.target.value)}
-            fullWidth
-            multiline
-            rows={3}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPromptDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };
