@@ -8,8 +8,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CircularProgress from '@mui/material/CircularProgress';
 
 // SpeedDial features moved to ChatInboxPage
 import Dialog from '@mui/material/Dialog';
@@ -107,7 +105,6 @@ const ChatConversationPage: React.FC = () => {
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
-  const [generating, setGenerating] = useState(false);
 
 
 
@@ -243,7 +240,6 @@ const handleSend = () => {
   };
 
   const handleGenerateAI = () => {
-    setGenerating(true);
     updateMessages((prev) => {
       const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
       const generated: Message[] = [];
@@ -259,7 +255,6 @@ const handleSend = () => {
       return [...prev, ...generated];
     });
     scrollToBottomIfNeeded();
-    setTimeout(() => setGenerating(false), 500);
   };
 
   const computeTimestamp = (index: number) => {
