@@ -22,6 +22,12 @@ import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 
+import Pagination from '@mui/material/Pagination';
+import PaginationItem from '@mui/material/PaginationItem';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
+
 import { Link, useParams } from 'react-router-dom';
 
 interface Avatar {
@@ -103,7 +109,9 @@ const ChatConversationPage: React.FC = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
 
-  const pageGestureRef = useRef({ startX: 0, startY: 0, dragging: false });
+  const pageGestureRef = useRef({ startX: 0, startY: 0, dx: 0, dragging: false });
+  const [pageDragX, setPageDragX] = useState(0);
+
 
   const currentConversation = conversations[conversationIndex];
   const messages = currentConversation.messages;
@@ -310,8 +318,8 @@ const handleSend = () => {
       role: 'member',
       status: 'active',
       joined_at: conversations[0].startDateTime.toISOString(),
-
     }));
+
 
     return {
       system_metadata: {
@@ -398,6 +406,8 @@ const handleInputChange = (
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
+        transform: `translateX(${pageDragX}px)`,
+        transition: pageGestureRef.current.dragging ? 'none' : 'transform 0.3s',
       }}
       onClick={() => {
         setMenuId(null);
@@ -407,7 +417,21 @@ const handleInputChange = (
         const g = pageGestureRef.current;
         g.startX = e.touches[0].clientX;
         g.startY = e.touches[0].clientY;
+        g.dx = 0;
         g.dragging = true;
+        setPageDragX(0);
+      }}
+      onTouchMove={(e) => {
+        const g = pageGestureRef.current;
+        if (!g.dragging) return;
+        g.dx = e.touches[0].clientX - g.startX;
+        setPageDragX(g.dx);
+      }}
+      onTouchCancel={() => {
+        const g = pageGestureRef.current;
+        g.dragging = false;
+        setPageDragX(0);
+
       }}
       onTouchEnd={(e) => {
         const g = pageGestureRef.current;
@@ -415,6 +439,8 @@ const handleInputChange = (
         const dx = e.changedTouches[0].clientX - g.startX;
         const dy = e.changedTouches[0].clientY - g.startY;
         g.dragging = false;
+        setPageDragX(0);
+
         if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
           if (dx < 0) {
             if (conversationIndex === conversations.length - 1) {
@@ -442,7 +468,21 @@ const handleInputChange = (
         const g = pageGestureRef.current;
         g.startX = e.clientX;
         g.startY = e.clientY;
+        g.dx = 0;
         g.dragging = true;
+        setPageDragX(0);
+      }}
+      onMouseMove={(e) => {
+        const g = pageGestureRef.current;
+        if (!g.dragging) return;
+        g.dx = e.clientX - g.startX;
+        setPageDragX(g.dx);
+      }}
+      onMouseLeave={() => {
+        const g = pageGestureRef.current;
+        g.dragging = false;
+        setPageDragX(0);
+
       }}
       onMouseUp={(e) => {
         const g = pageGestureRef.current;
@@ -450,6 +490,8 @@ const handleInputChange = (
         const dx = e.clientX - g.startX;
         const dy = e.clientY - g.startY;
         g.dragging = false;
+        setPageDragX(0);
+
         if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
           if (dx < 0) {
             if (conversationIndex === conversations.length - 1) {
@@ -484,20 +526,65 @@ const handleInputChange = (
         <span className="header-name">{id}</span>
       </div>
       <div className="conversation-nav">
-        {conversations.map((c, idx) => (
-          <button
-            key={c.id}
-            className={idx === conversationIndex ? 'active' : ''}
-            onClick={() => {
-              if (idx !== conversationIndex) {
-                setTransitionDir(idx > conversationIndex ? 'left' : 'right');
-                setConversationIndex(idx);
-              }
-            }}
-          >
-            {idx + 1}
-          </button>
-        ))}
+        <Pagination
+          count={conversations.length}
+          page={conversationIndex + 1}
+          renderItem={(item) => {
+            if (item.type === 'previous') {
+              return (
+                <PaginationItem
+                  {...item}
+                  slots={{ previous: ArrowBackIcon }}
+                  onClick={() => {
+                    setConversationIndex((i) => Math.max(0, i - 1));
+                    setTransitionDir('right');
+                  }}
+                />
+              );
+            }
+            if (item.type === 'next') {
+              const isLast = conversationIndex === conversations.length - 1;
+              return (
+                <PaginationItem
+                  {...item}
+                  slots={{ next: isLast ? AddIcon : ArrowForwardIcon }}
+                  disabled={false}
+                  onClick={() => {
+                    if (isLast) {
+                      setConversations((prev) => [
+                        ...prev,
+                        {
+                          id: `conv-${Math.random()
+                            .toString(36)
+                            .slice(2, 10)}`,
+                          startDateTime: new Date(),
+                          messages: [],
+                        },
+                      ]);
+                      setConversationIndex(conversations.length);
+                    } else {
+                      setConversationIndex((i) => i + 1);
+                    }
+                    setTransitionDir('left');
+                  }}
+                />
+              );
+            }
+            return (
+              <PaginationItem
+                {...item}
+                onClick={() => {
+                  const idx = item.page - 1;
+                  if (idx !== conversationIndex) {
+                    setTransitionDir(idx > conversationIndex ? 'left' : 'right');
+                    setConversationIndex(idx);
+                  }
+                }}
+              />
+            );
+          }}
+        />
+
       </div>
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.

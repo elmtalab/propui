@@ -289,19 +289,7 @@
   margin-bottom: 8px;
 }
 
-.conversation-nav button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: #eee;
-  cursor: pointer;
-}
 
-.conversation-nav button.active {
-  background: #0088cc;
-  color: #fff;
-}
 
 .back-icon {
   text-decoration: none;
