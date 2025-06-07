@@ -9,6 +9,19 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,6 +51,11 @@ function a11yProps(index: number) {
     'aria-controls': `chat-tabpanel-${index}`,
   };
 }
+
+const groupCategories: Record<string, string[]> = {
+  Sports: ['Football Fans', 'Basketball Lovers'],
+  Movies: ['Sci-Fi Lovers', 'Comedy Club'],
+};
 
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
@@ -132,6 +150,26 @@ const ChatInboxPage: React.FC = () => {
   const [viewportHeight, setViewportHeight] = useState<number>(
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [promptDialogOpen, setPromptDialogOpen] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState({
+    displayName: '',
+    occupation: '',
+    assistantTraits: '',
+    extraContext: '',
+  });
+
+  const handleToggleGroup = (group: string) => {
+    setSelectedGroups((prev) =>
+      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
+    );
+  };
+
+  const handlePromptChange = (field: keyof typeof systemPrompt, value: string) => {
+    setSystemPrompt((prev) => ({ ...prev, [field]: value }));
+  };
 
 
   useEffect(() => {
@@ -200,6 +238,98 @@ const ChatInboxPage: React.FC = () => {
           }}
         />
       </TabPanel>
+
+      <SpeedDial
+        ariaLabel="chat actions"
+        icon={<SpeedDialIcon />}
+        open={speedDialOpen}
+        onOpen={() => setSpeedDialOpen(true)}
+        onClose={() => setSpeedDialOpen(false)}
+        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+      >
+        <SpeedDialAction
+          icon={<GroupAddIcon />}
+          tooltipTitle="Add Group"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            setGroupDialogOpen(true);
+          }}
+        />
+        <SpeedDialAction
+          icon={<SettingsSuggestIcon />}
+          tooltipTitle="System Prompt"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            setPromptDialogOpen(true);
+          }}
+        />
+      </SpeedDial>
+
+      <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
+        <DialogTitle>Select Groups</DialogTitle>
+        <DialogContent dividers>
+          {Object.entries(groupCategories).map(([cat, groups]) => (
+            <div key={cat} style={{ marginBottom: 8 }}>
+              <div style={{ fontWeight: 'bold' }}>{cat}</div>
+              {groups.map((g) => (
+                <FormControlLabel
+                  key={g}
+                  control={
+                    <Checkbox
+                      checked={selectedGroups.includes(g)}
+                      onChange={() => handleToggleGroup(g)}
+                    />
+                  }
+                  label={g}
+                />
+              ))}
+            </div>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setGroupDialogOpen(false)}>Done</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={promptDialogOpen}
+        onClose={() => setPromptDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>System Prompt</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Nickname"
+            value={systemPrompt.displayName}
+            onChange={(e) => handlePromptChange('displayName', e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label="What do you do?"
+            value={systemPrompt.occupation}
+            onChange={(e) => handlePromptChange('occupation', e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label="AI traits"
+            value={systemPrompt.assistantTraits}
+            onChange={(e) => handlePromptChange('assistantTraits', e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label="Anything else?"
+            value={systemPrompt.extraContext}
+            onChange={(e) => handlePromptChange('extraContext', e.target.value)}
+            fullWidth
+            multiline
+            rows={3}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPromptDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
