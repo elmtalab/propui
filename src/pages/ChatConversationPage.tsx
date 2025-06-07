@@ -404,6 +404,8 @@ const handleInputChange = (
         height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
+        boxSizing: 'border-box',
+        width: '100%',
         transform: `translateX(${pageDragX}px)`,
         transition: pageGestureRef.current.dragging ? 'none' : 'transform 0.3s',
       }}
