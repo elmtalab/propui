@@ -186,6 +186,32 @@
   margin-left: 4px;
 }
 
+.chat-messages.animate-left {
+  animation: slideLeft 0.35s forwards;
+}
+
+.chat-messages.animate-right {
+  animation: slideRight 0.35s forwards;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 .selected-avatar {
   width: 40px;
   height: 40px;
@@ -255,6 +281,14 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 2;
 }
+
+.conversation-nav {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
 
 .back-icon {
   text-decoration: none;
