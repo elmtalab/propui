@@ -89,6 +89,7 @@ const ChatConversationPage: React.FC = () => {
   const [conversationIndex, setConversationIndex] = useState(0);
   const [transitionDir, setTransitionDir] = useState<'left' | 'right' | null>(null);
 
+
   const [text, setText] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
   const [showAvatars, setShowAvatars] = useState(false);
@@ -110,6 +111,7 @@ const ChatConversationPage: React.FC = () => {
 
   const pageGestureRef = useRef({ startX: 0, startY: 0, dx: 0, dragging: false });
   const [pageDragX, setPageDragX] = useState(0);
+
 
   const currentConversation = conversations[conversationIndex];
   const messages = currentConversation.messages;
@@ -296,6 +298,7 @@ const handleSend = () => {
         };
       });
 
+
       return {
         conversation_id: conv.id,
         start_time: conv.startDateTime.toISOString(),
@@ -317,6 +320,7 @@ const handleSend = () => {
       joined_at: conversations[0].startDateTime.toISOString(),
     }));
 
+
     return {
       system_metadata: {
         version: '1.0.1',
@@ -335,6 +339,7 @@ const handleSend = () => {
           group_description: '',
           members,
           conversations: conversationsJson,
+
         },
       ],
       ai_users: [],
@@ -369,6 +374,7 @@ const handleInputChange = (
       return () => clearTimeout(t);
     }
   }, [transitionDir]);
+
 
   useEffect(() => {
     if (replyTo) {
@@ -425,6 +431,7 @@ const handleInputChange = (
         const g = pageGestureRef.current;
         g.dragging = false;
         setPageDragX(0);
+
       }}
       onTouchEnd={(e) => {
         const g = pageGestureRef.current;
@@ -433,6 +440,7 @@ const handleInputChange = (
         const dy = e.changedTouches[0].clientY - g.startY;
         g.dragging = false;
         setPageDragX(0);
+
         if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
           if (dx < 0) {
             if (conversationIndex === conversations.length - 1) {
@@ -452,6 +460,7 @@ const handleInputChange = (
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
             setTransitionDir('right');
+
           }
         }
       }}
@@ -473,6 +482,7 @@ const handleInputChange = (
         const g = pageGestureRef.current;
         g.dragging = false;
         setPageDragX(0);
+
       }}
       onMouseUp={(e) => {
         const g = pageGestureRef.current;
@@ -481,6 +491,7 @@ const handleInputChange = (
         const dy = e.clientY - g.startY;
         g.dragging = false;
         setPageDragX(0);
+
         if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
           if (dx < 0) {
             if (conversationIndex === conversations.length - 1) {
@@ -500,6 +511,7 @@ const handleInputChange = (
           } else if (dx > 0 && conversationIndex > 0) {
             setConversationIndex((i) => i - 1);
             setTransitionDir('right');
+
           }
         }
       }}
@@ -572,6 +584,7 @@ const handleInputChange = (
             );
           }}
         />
+
       </div>
       <div className="instruction-text">
         You are creating messages. The AI will execute these messages.
