@@ -144,6 +144,7 @@ const ChatInboxPage: React.FC = () => {
       (c: any) =>
         !c.type || c.type === 'Draft' ||
         c.messages?.some((m: any) => !m.status || m.status === 'draft')
+
     )
   );
 

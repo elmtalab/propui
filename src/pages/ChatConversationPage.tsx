@@ -135,6 +135,7 @@ const ChatConversationPage: React.FC = () => {
               status: m.status || defaultStatus,
             };
           }),
+
         }));
         if (convs.length) {
           setConversations(convs);
