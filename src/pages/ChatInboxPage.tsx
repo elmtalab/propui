@@ -258,6 +258,7 @@ const ChatInboxPage: React.FC = () => {
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searching, setSearching] = useState(false);
   const [promptDialogOpen, setPromptDialogOpen] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState({
     displayName: '',
@@ -296,6 +297,52 @@ const ChatInboxPage: React.FC = () => {
       ...prev,
       assistantTraits: prev.assistantTraits.filter((t) => t !== trait),
     }));
+  };
+
+  const handleSearchGroup = () => {
+    const q = searchTerm.trim();
+    if (!q) return;
+    let tgId: number | null = null;
+    const tgStr = localStorage.getItem('tg_init_data');
+    if (tgStr) {
+      try {
+        tgId = JSON.parse(tgStr).user?.id ?? null;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ?? null;
+    }
+    if (!tgId) return;
+
+    setSearching(true);
+    fetch('https://prop-backend-worker.elmtalabx.workers.dev/api/groups', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramId: tgId, q }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const g = data?.group?.group;
+        if (g && g.id) {
+          setGroups((prev) => {
+            if (prev.some((pg) => pg.groupId === g.id)) return prev;
+            return [...prev, { groupId: g.id, conversations: [] }];
+          });
+          setUserGroups((prev) => {
+            if (prev.some((pg) => pg.id === g.id)) return prev;
+            return [...prev, g];
+          });
+          setSelectedGroups((prev) => Array.from(new Set([...prev, String(g.id)])));
+          setSearchTerm('');
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      })
+      .finally(() => setSearching(false));
   };
 
 
@@ -340,31 +387,47 @@ const ChatInboxPage: React.FC = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabIndex} index={0}>
-        <ChatList
-          className="chat-list"
-          dataSource={executedChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {executedChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={executedChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No executed messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
-        <ChatList
-          className="chat-list"
-          dataSource={scheduledChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {scheduledChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={scheduledChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No scheduled messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
-        <ChatList
-          className="chat-list"
-          dataSource={draftChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {draftChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={draftChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">No drafts yet. Tap + to create one.</p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={3}>
         <ChatList
@@ -374,6 +437,7 @@ const ChatInboxPage: React.FC = () => {
             navigate(`/chat/${(item as any).id}`);
           }}
         />
+
       </TabPanel>
 
       <SpeedDial
@@ -383,6 +447,7 @@ const ChatInboxPage: React.FC = () => {
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
         sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        className="fab"
       >
         <SpeedDialAction
           icon={<GroupAddIcon />}
@@ -420,14 +485,23 @@ const ChatInboxPage: React.FC = () => {
       <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
         <DialogTitle>Select Groups</DialogTitle>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <TextField
-            placeholder="Search groups"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mb: 1 }}
-          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <TextField
+              placeholder="Search groups"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              fullWidth
+              size="small"
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearchGroup}
+              disabled={searching}
+            >
+              Search
+            </Button>
+          </div>
+          <div style={{ height: 8 }} />
           {Object.entries(groupCategories).map(([cat, groups]) => (
             <div key={cat} style={{ marginBottom: 8 }}>
               <div style={{ fontWeight: 'bold' }}>{cat}</div>
@@ -447,18 +521,6 @@ const ChatInboxPage: React.FC = () => {
                 ))}
             </div>
           ))}
-          {searchTerm &&
-            !Object.values(groupCategories).flat().some((g) => g === searchTerm) && (
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setSelectedGroups((prev) => [...prev, searchTerm]);
-                  setSearchTerm('');
-                }}
-              >
-                Add "{searchTerm}" as group
-              </Button>
-            )}
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'space-between' }}>
           <Button
