@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useRawInitData } from '@telegram-apps/sdk-react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../logo.svg';
 import '../App.css';
 
 interface TelegramInitData {
@@ -17,31 +17,53 @@ interface TelegramInitData {
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [initData, setInitData] = useState<TelegramInitData | null>(null);
+  const rawInitData = useRawInitData();
 
   useEffect(() => {
-    const tg = (window as any).Telegram?.WebApp;
-    if (tg && tg.initDataUnsafe) {
-      setInitData(tg.initDataUnsafe);
+    let data: TelegramInitData | null = null;
+    if (rawInitData) {
       try {
-        localStorage.setItem('tg_init_data', JSON.stringify(tg.initDataUnsafe));
+        data = JSON.parse(rawInitData);
+      } catch {
+        // ignore parse errors
+      }
+    }
+    if (!data) {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg && tg.initDataUnsafe) {
+        data = tg.initDataUnsafe;
+      } else {
+        try {
+          const stored = localStorage.getItem('tg_init_data');
+          if (stored) {
+            data = JSON.parse(stored);
+          }
+        } catch {
+          // ignore read errors
+        }
+      }
+    }
+    if (data) {
+      setInitData(data);
+      try {
+        localStorage.setItem('tg_init_data', JSON.stringify(data));
       } catch {
         // ignore write errors
       }
     }
-  }, []);
+  }, [rawInitData]);
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         {initData?.user && (
           <>
             <p>
-              Logged in as {initData.user.first_name}{' '}
+              {initData.user.first_name}{' '}
               {initData.user.last_name ?? ''}
               {initData.user.username ? ` (@${initData.user.username})` : ''}
             </p>
-            <p>User ID: {initData.user.id}</p>
+            <p>Telegram ID: {initData.user.id}</p>
           </>
 
         )}
