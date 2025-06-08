@@ -15,6 +15,7 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import TimerIcon from '@mui/icons-material/Timer';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -278,6 +279,11 @@ const ChatInboxPage: React.FC = () => {
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
+  const [speedDialPos, setSpeedDialPos] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth - 80 : 300,
+    y: typeof window !== 'undefined' ? window.innerHeight - 80 : 400,
+  }));
+  const [draggingDial, setDraggingDial] = useState(false);
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -388,6 +394,20 @@ const ChatInboxPage: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!draggingDial) return;
+    const handleMove = (e: PointerEvent) => {
+      setSpeedDialPos((pos) => ({ x: pos.x + e.movementX, y: pos.y + e.movementY }));
+    };
+    const stop = () => setDraggingDial(false);
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', stop);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', stop);
+    };
+  }, [draggingDial]);
+
 
   return (
     <div className="chat-container" style={{ height: viewportHeight }}>
@@ -475,8 +495,13 @@ const ChatInboxPage: React.FC = () => {
         open={speedDialOpen}
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 1500 }}
         className="fab"
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
+            setDraggingDial(true);
+          }
+        }}
       >
         <SpeedDialAction
           icon={<GroupAddIcon />}
@@ -507,6 +532,14 @@ const ChatInboxPage: React.FC = () => {
                   'selected groups'}...`
               );
             }
+          }}
+        />
+        <SpeedDialAction
+          icon={<TimerIcon />}
+          tooltipTitle="Schedule"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            navigate('/chat');
           }}
         />
       </SpeedDial>
