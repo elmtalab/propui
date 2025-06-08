@@ -414,10 +414,79 @@
   background: var(--tg-bg-color);
 }
 
+.chat-tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 500;
+  color: var(--tg-text-color);
+}
+
+.chat-tabs .MuiTab-root.Mui-selected {
+  font-weight: bold;
+  color: var(--tg-button-color);
+}
+
+.chat-tabs .MuiTabs-indicator {
+  background-color: var(--tg-button-color);
+}
+
 .chat-list {
   background: var(--tg-secondary-bg-color);
   color: var(--tg-text-color);
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 72px;
 
+}
+
+/* Chat list items */
+.chat-list .rce-citem {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--tg-border-color);
+  background: var(--tg-secondary-bg-color);
+}
+
+.chat-list .rce-citem-avatar img {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+}
+
+.chat-list .rce-citem-body--top-title {
+  color: var(--tg-text-color);
+  font-weight: bold;
+  white-space: normal;
+}
+
+.chat-list .rce-citem-body--bottom-title {
+  color: #aaa;
+}
+
+.chat-list .rce-citem-body--top-time {
+  color: #aaa;
+}
+
+.tab-panel {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.fab .MuiFab-root {
+  background-color: #03a9f4;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+}
+
+.fab .MuiFab-root:hover {
+  transform: scale(1.1);
+}
+
+.empty-message {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
 }
 
 
