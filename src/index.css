@@ -24,6 +24,16 @@ body {
 body.tg-dark {
   color-scheme: dark;
   --tg-border-color: #444;
+  --tg-bg-color: var(--tg-theme-bg-color, #1f1f1f);
+  --tg-text-color: var(--tg-theme-text-color, #ffffff);
+  --tg-secondary-bg-color: var(
+    --tg-theme-secondary-bg-color,
+    #2a2a2a
+  );
+  --tg-button-color: var(--tg-theme-button-color, #0088cc);
+  --tg-button-text-color: var(--tg-theme-button-text-color, #ffffff);
+  --tg-link-color: var(--tg-theme-link-color, #61dafb);
+
 }
 
 code {
