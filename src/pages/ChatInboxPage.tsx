@@ -206,7 +206,10 @@ const ChatInboxPage: React.FC = () => {
     )
       .then((r) => r.json())
       .then((data) => {
-        setUserGroups(data.groups || []);
+        const groups = Array.isArray(data.groups)
+          ? data.groups.map((g: any) => g.group || g)
+          : [];
+        setUserGroups(groups);
       })
       .catch(() => setUserGroups([]));
   }, [tabIndex, userGroups.length]);
@@ -251,6 +254,7 @@ const ChatInboxPage: React.FC = () => {
     return {
       id,
       avatar: g.photo || undefined,
+
       alt: name,
       title: name,
       subtitle: lastMsg.text || '',
@@ -258,6 +262,7 @@ const ChatInboxPage: React.FC = () => {
       dateString: lastMsg.createdAt
         ? new Date(lastMsg.createdAt).toLocaleString()
         : undefined,
+
       unread: 0,
     };
   };
@@ -461,6 +466,7 @@ const ChatInboxPage: React.FC = () => {
         ) : (
           <p className="empty-message">No groups found. Tap + to add one.</p>
         )}
+
       </TabPanel>
 
       <SpeedDial

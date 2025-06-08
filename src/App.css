@@ -442,6 +442,7 @@
   background-color: var(--tg-button-color);
   height: 3px;
   border-radius: 2px;
+
 }
 
 .chat-list {
@@ -456,12 +457,14 @@
 /* Chat list items */
 .chat-list .rce-citem {
   padding: 8px 12px;
+
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--tg-border-color);
   background: var(--tg-secondary-bg-color);
   min-height: 64px;
   box-sizing: border-box;
+
 }
 
 .chat-list .rce-citem-avatar img {
@@ -470,6 +473,7 @@
   margin-right: 12px;
   object-fit: cover;
   border-radius: 50%;
+
 }
 
 .chat-list .rce-citem-body--top-title {
@@ -478,6 +482,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
 }
 
 .chat-list .rce-citem-body--bottom-title {
@@ -485,11 +490,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
 }
 
 .chat-list .rce-citem-body--top-time {
   color: #aaa;
   white-space: nowrap;
+
 }
 
 .tab-panel {
@@ -500,6 +507,7 @@
 
 .tab-panel[hidden] {
   display: none !important;
+
 }
 
 .fab .MuiFab-root {
