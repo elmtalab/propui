@@ -1,49 +1,31 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: var(--tg-secondary-bg-color);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: var(--tg-text-color);
-}
-
-.App-link {
-  color: var(--tg-link-color);
-}
-
 .chat-container {
   width: 100%;
-  height: 100dvh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  background: var(--tg-bg-color);
+  background: var(--bg-color);
+}
+
+.chat-header,
+.inbox-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.inbox-header {
+  justify-content: space-between;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  scroll-behavior: smooth;
-  background: var(--tg-bg-color);
+  padding: 8px;
+  background: var(--bg-color);
 }
 
 .message-item {
@@ -71,362 +53,58 @@
   max-width: 70%;
   padding: 8px 12px;
   border-radius: 12px;
-  /* white text on light bubble colors was hard to read */
-  color: #000;
-  position: relative;
-  background: var(--tg-secondary-bg-color);
-
-}
-
-.message-menu {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--tg-secondary-bg-color);
-  border: 1px solid var(--tg-border-color);
-  padding: 4px;
-  border-radius: 4px;
-  z-index: 1000;
-  color: var(--tg-text-color);
-}
-
-.message-menu button {
-  background: none;
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 16px;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.message-time {
-  font-size: 10px;
-  margin-top: 4px;
-  color: var(--tg-text-color);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.status-icon {
-  font-size: 10px;
-}
-
-.delay-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.delay-wrapper.left {
-  order: -1;
-  margin-right: 4px;
-}
-.delay-wrapper.right {
-  margin-left: 4px;
-  order: 2;
-}
-
-.delay-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-
-.message-item.swipe {
-  transform: translateX(40px);
-  transition: transform 0.2s;
-}
-.message-item.dragging {
-  transition: none;
-}
-
-.reply-text {
-  font-size: 12px;
-  background: var(--tg-secondary-bg-color);
-  color: var(--tg-text-color);
-  padding: 2px 4px;
-  border-radius: 4px;
-  margin-bottom: 4px;
-}
-
-.message-input-container {
-  display: flex;
-  align-items: center;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
-  background: var(--tg-bg-color);
-  border-top: 1px solid var(--tg-border-color);
-  transition: all 0.3s;
-  width: 100%;
-  margin: 0;
-}
-
-.message-input-container.focused .MuiIconButton-root:not(.send-button) {
-  display: none;
-}
-
-.message-input-container textarea {
-  flex: 1;
-  padding: 8px 12px;
-  margin: 0 8px;
-  border: 1px solid var(--tg-border-color);
-  border-radius: 20px;
-  font-size: 14px;
-  background: var(--tg-secondary-bg-color);
-  line-height: 1.4;
-  transition: width 0.3s;
-  max-height: 20vh;
-  overflow-y: hidden;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.message-input-container.focused textarea {
-  width: 100%;
-}
-
-.send-button {
-  margin-left: 4px;
-}
-
-.chat-messages.animate-left {
-  animation: slideLeft 0.35s forwards;
-}
-
-.chat-messages.animate-right {
-  animation: slideRight 0.35s forwards;
-}
-
-@keyframes slideLeft {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideRight {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-.selected-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.avatar-list {
-  position: absolute;
-  bottom: 48px;
-  left: 0;
-  display: flex;
-  gap: 8px;
-  background: var(--tg-secondary-bg-color);
-  border: 1px solid var(--tg-border-color);
-  padding: 4px;
-  border-radius: 4px;
-  z-index: 10;
-}
-
-.avatar-list img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.reply-preview-wrapper {
-  position: fixed;
-  bottom: 60px;
-  left: 0;
-  right: 0;
-  padding: 8px;
-  z-index: 5;
-  width: 100%;
-  margin: 0;
-}
-
-.reply-preview {
-  font-size: 16px;
-  background: var(--tg-secondary-bg-color);
-  padding: 4px;
-  border-left: 4px solid var(--tg-border-color);
-  margin-bottom: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.cancel-reply {
-  margin-left: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
-  position: sticky;
-  top: 0;
-  background: linear-gradient(135deg, #0088cc, #00bfff);
-  color: var(--tg-button-text-color);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-  flex-wrap: wrap;
-}
-.header-datetime {
-  margin-left: auto;
-  flex-shrink: 0;
-  flex-basis: auto;
-}
-
-.conversation-nav {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-
-
-.back-icon {
-  text-decoration: none;
-  font-size: 24px;
-  line-height: 1;
-  color: inherit;
+  background: var(--secondary-bg-color);
+  color: var(--text-color);
 }
 
 .header-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid var(--tg-button-text-color);
 }
 
 .header-name {
   font-weight: bold;
-  color: var(--tg-button-text-color);
-  overflow-wrap: anywhere;
 }
 
 .instruction-text {
   text-align: center;
-  margin: 8px 0;
+  margin: 8px;
   font-size: 14px;
-  color: var(--tg-text-color);
-  background: var(--tg-secondary-bg-color);
-  border: 1px solid var(--tg-border-color);
+  background: var(--secondary-bg-color);
+  border: 1px solid var(--border-color);
   padding: 8px;
   border-radius: 4px;
 }
 
 .generate-btn {
-  background: linear-gradient(90deg, var(--tg-button-color), var(--tg-button-color));
-  color: var(--tg-button-text-color);
-  padding: 12px 24px;
-  border-radius: 16px;
-  font-weight: 500;
-  font-size: 16px;
-  width: 100%;
-  font-family: "Roboto", sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: filter 0.2s, box-shadow 0.2s;
-}
-
-.generate-btn:hover {
-  filter: brightness(0.95);
-}
-
-.generate-btn:active {
-  filter: brightness(0.9);
-  box-shadow: 0 0 6px rgba(0, 198, 255, 0.6);
+  background: var(--button-color);
+  color: var(--button-text-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
 }
 
 .schedule-btn {
   padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  width: auto;
 }
 
-.inbox-header {
+.conversation-nav {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  background: linear-gradient(135deg, #0088cc, #00bfff);
-  color: var(--tg-button-text-color);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.chat-list {
+  background: var(--bg-color);
 }
 
 .settings-icon {
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--tg-button-text-color);
+  color: inherit;
 }
 
 .tabs {
   display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
 }
 
-.tabs button {
-  flex: 1;
-  padding: 8px 0;
-  background: var(--tg-secondary-bg-color);
-  border: none;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  color: var(--tg-text-color);
-}
-
-.tabs button.active {
-  font-weight: bold;
-  border-bottom-color: var(--tg-text-color);
-  background: var(--tg-bg-color);
-}
-
-.chat-list {
-  background: var(--tg-secondary-bg-color);
-  color: var(--tg-text-color);
-
-}
-
-
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}

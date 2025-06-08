@@ -5,19 +5,6 @@ import 'react-chat-elements/dist/main.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-const tg = (window as any).Telegram?.WebApp;
-const applyTheme = () => {
-  if (!tg) return;
-  document.body.classList.toggle('tg-dark', tg.colorScheme === 'dark');
-  const params = tg.themeParams || {};
-  Object.entries(params).forEach(([k, v]) => {
-    document.body.style.setProperty(`--tg-theme-${k}`, String(v));
-  });
-};
-
-applyTheme();
-tg?.onEvent('themeChanged', applyTheme);
-
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
