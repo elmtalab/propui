@@ -87,9 +87,17 @@ const ChatInboxPage: React.FC = () => {
     )
       .then((r) => r.json())
       .then((data) => {
-        const g = data.groups || [];
-        setGroups(g);
-        localStorage.setItem('conversations', JSON.stringify(g));
+        const convs = data.conversations || [];
+        const map: Record<string, any> = {};
+        convs.forEach((c: any) => {
+          if (!map[c.groupId]) {
+            map[c.groupId] = { groupId: c.groupId, conversations: [] };
+          }
+          map[c.groupId].conversations.push(c);
+        });
+        const grouped = Object.values(map);
+        setGroups(grouped);
+        localStorage.setItem('conversations', JSON.stringify(grouped));
       })
       .catch(() => {
         const stored = localStorage.getItem('conversations');
