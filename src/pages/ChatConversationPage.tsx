@@ -110,6 +110,7 @@ const ChatConversationPage: React.FC = () => {
     useState<{ x: number; y: number } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const [groupInfo, setGroupInfo] = useState<any>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('conversations');
@@ -144,6 +145,40 @@ const ChatConversationPage: React.FC = () => {
     } catch {
       /* ignore */
     }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    let tgId: number | null = null;
+    const tgStr = localStorage.getItem('tg_init_data');
+    if (tgStr) {
+      try {
+        tgId = JSON.parse(tgStr).user?.id ?? null;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ?? null;
+    }
+    if (!tgId) return;
+    fetch(
+      `https://prop-backend-worker.elmtalabx.workers.dev/api/groups?telegramId=${tgId}`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const groups = Array.isArray(data.groups)
+          ? data.groups.map((g: any) => g.group || g)
+          : [];
+        const g = groups.find(
+          (gr: any) => String(gr.id ?? gr.groupId) === String(id)
+        );
+        if (g) setGroupInfo(g);
+      })
+      .catch(() => {
+        /* ignore */
+      });
   }, [id]);
 
   const skipScrollRef = useRef(false);
@@ -500,6 +535,12 @@ const handleInputChange = (
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const headerName = (() => {
+    const base = groupInfo?.title || groupInfo?.name || groupInfo?.username || '';
+    let clean = (base || '').trim();
+    if (clean.startsWith('@')) clean = clean.slice(1);
+    return clean ? `${clean} (${id})` : `Group ${id}`;
+  })();
 
   return (
     <div
@@ -531,7 +572,7 @@ const handleInputChange = (
           className="header-avatar"
           alt={id}
         />
-        <span className="header-name">{id}</span>
+        <span className="header-name">{headerName}</span>
         <DateTimePicker
           className="header-datetime"
           onChange={(d) => d && updateStartDateTime(d)}
