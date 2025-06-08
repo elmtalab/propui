@@ -206,7 +206,10 @@ const ChatInboxPage: React.FC = () => {
     )
       .then((r) => r.json())
       .then((data) => {
-        setUserGroups(data.groups || []);
+        const groups = Array.isArray(data.groups)
+          ? data.groups.map((g: any) => g.group || g)
+          : [];
+        setUserGroups(groups);
       })
       .catch(() => setUserGroups([]));
   }, [tabIndex, userGroups.length]);
