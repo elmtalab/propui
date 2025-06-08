@@ -166,6 +166,10 @@ const ChatConversationPage: React.FC = () => {
       groups[idx].conversations = data;
     }
     localStorage.setItem('conversations', JSON.stringify(groups));
+    if (id) {
+      const ledgerKey = `draft-json-${id}`;
+      localStorage.setItem(ledgerKey, JSON.stringify(generateJSON()));
+    }
   }, [conversations, id]);
 
 

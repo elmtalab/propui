@@ -75,6 +75,7 @@
   color: #000;
   position: relative;
   background: var(--tg-secondary-bg-color);
+
 }
 
 .message-menu {
@@ -416,6 +417,7 @@
 .chat-list {
   background: var(--tg-secondary-bg-color);
   color: var(--tg-text-color);
+
 }
 
 
