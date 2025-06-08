@@ -520,7 +520,7 @@ body.tg-dark .conversation-nav .MuiPaginationItem-root {
 
 .fab {
   position: fixed;
-  z-index: 1500;
+  z-index: 9999;
 }
 
 .fab .MuiFab-root {

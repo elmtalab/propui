@@ -495,7 +495,7 @@ const ChatInboxPage: React.FC = () => {
         open={speedDialOpen}
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 1500 }}
+        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 9999 }}
 
         className="fab"
         onPointerDown={(e) => {
