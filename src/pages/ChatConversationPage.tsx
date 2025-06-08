@@ -106,10 +106,53 @@ const ChatConversationPage: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const stored = localStorage.getItem('conversations');
+    if (!stored) return;
+    try {
+      const groups = JSON.parse(stored);
+      const g = groups.find((gr: any) => gr.groupId === id);
+      if (g && g.conversations) {
+        const convs: Conversation[] = g.conversations.map((c: any) => ({
+          id: c.conversationId || c.id,
+          startDateTime: new Date(c.createdAt || new Date()),
+          messages: (c.messages || []).map((m: any, idx: number) => ({
+            id: idx + 1,
+            from: m.sender_id || m.from || selectedAvatar.id,
+            text: m.text || m.message_content || '',
+            delay: 0,
+          })),
+        }));
+        if (convs.length) {
+          setConversations(convs);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [id]);
+
   const skipScrollRef = useRef(false);
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    const ls = localStorage.getItem('conversations');
+    const groups = ls ? JSON.parse(ls) : [];
+    const idx = groups.findIndex((g: any) => g.groupId === id);
+    const data = conversations.map((c) => ({
+      conversationId: c.id,
+      createdAt: c.startDateTime,
+      messages: c.messages,
+    }));
+    if (idx === -1) {
+      groups.push({ groupId: id, conversations: data });
+    } else {
+      groups[idx].conversations = data;
+    }
+    localStorage.setItem('conversations', JSON.stringify(groups));
+  }, [conversations, id]);
 
 
 
@@ -244,24 +287,41 @@ const handleSend = () => {
     setDelayMenuId(null);
   };
 
-  const handleGenerateAI = () => {
+  const handleSchedule = () => {
     setGenerating(true);
-    updateMessages((prev) => {
-      const startId = prev.length ? prev[prev.length - 1].id + 1 : 1;
-      const generated: Message[] = [];
-      for (let i = 0; i < 10; i++) {
-        const avatar = avatars[i % avatars.length];
-        generated.push({
-          id: startId + i,
-          from: avatar.id,
-          text: `Automated message ${i + 1}`,
-          delay: 0,
-        });
+    const stored = localStorage.getItem('tg_init_data');
+    const telegramId = stored ? JSON.parse(stored).user?.id : null;
+    const conv = conversations[conversationIndex];
+    const payload = {
+      telegramId,
+      groupId: id,
+      messages: conv.messages.map((m) => ({ text: m.text })),
+      type: 'Scheduled',
+    };
+    try {
+      const ls = localStorage.getItem('conversations');
+      const groups = ls ? JSON.parse(ls) : [];
+      const idx = groups.findIndex((g: any) => g.groupId === id);
+      const convData = {
+        conversationId: conv.id,
+        createdAt: conv.startDateTime,
+        messages: conv.messages,
+        type: 'Scheduled',
+      };
+      if (idx === -1) {
+        groups.push({ groupId: id, conversations: [convData] });
+      } else {
+        groups[idx].conversations = [convData];
       }
-      return [...prev, ...generated];
-    });
-    scrollToBottomIfNeeded();
-    setTimeout(() => setGenerating(false), 500);
+      localStorage.setItem('conversations', JSON.stringify(groups));
+    } catch {
+      /* ignore */
+    }
+    fetch('https://prop-backend-worker.elmtalabx.workers.dev/api/conversations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).finally(() => setGenerating(false));
   };
 
   const computeTimestamp = (index: number) => {
@@ -506,7 +566,7 @@ const handleInputChange = (
       >
         <Button
           className="generate-btn schedule-btn"
-          onClick={handleGenerateAI}
+          onClick={handleSchedule}
           disabled={generating}
 
         >
@@ -789,7 +849,7 @@ const handleInputChange = (
 
         <IconButton
           onMouseDown={(e) => e.preventDefault()}
-          onClick={handleGenerateAI}
+          onClick={handleSchedule}
           color="primary"
           aria-label="generate-ai"
         >
