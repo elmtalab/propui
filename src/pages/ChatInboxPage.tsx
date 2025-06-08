@@ -238,10 +238,20 @@ const ChatInboxPage: React.FC = () => {
     const conversations = g.conversations || [];
     const lastConv = conversations[conversations.length - 1] || {};
     const lastMsg = lastConv.messages?.slice(-1)[0] || {};
-    const name = g.title || g.name || `Group ${g.groupId ?? g.id}`;
+
+    const id = g.groupId ?? g.id ?? '';
+    let candidate = g.title || g.name || g.username || '';
+    candidate = candidate.trim();
+    if (candidate.startsWith('@')) candidate = candidate.slice(1);
+    if (!candidate || /^\d+$/.test(candidate)) {
+      candidate = `Group ${id}`;
+    }
+    const name = candidate;
+
     return {
-      id: g.groupId ?? g.id,
-      avatar: g.photo || '',
+      id,
+      avatar: g.photo || undefined,
+
       alt: name,
       title: name,
       subtitle: lastMsg.text || '',

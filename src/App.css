@@ -425,8 +425,24 @@
   color: var(--tg-button-color);
 }
 
+.chat-tabs {
+  min-height: 48px;
+}
+
+.chat-tabs .MuiTab-root {
+  flex: 1;
+  min-height: 48px;
+}
+
+.chat-tabs .MuiTabs-flexContainer {
+  align-items: center;
+}
+
 .chat-tabs .MuiTabs-indicator {
   background-color: var(--tg-button-color);
+  height: 3px;
+  border-radius: 2px;
+
 }
 
 .chat-list {
@@ -446,26 +462,41 @@
   align-items: center;
   border-bottom: 1px solid var(--tg-border-color);
   background: var(--tg-secondary-bg-color);
+  min-height: 64px;
+  box-sizing: border-box;
+
 }
 
 .chat-list .rce-citem-avatar img {
   width: 40px;
   height: 40px;
   margin-right: 12px;
+  object-fit: cover;
+  border-radius: 50%;
+
 }
 
 .chat-list .rce-citem-body--top-title {
   color: var(--tg-text-color);
   font-weight: bold;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
 }
 
 .chat-list .rce-citem-body--bottom-title {
   color: #aaa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
 }
 
 .chat-list .rce-citem-body--top-time {
   color: #aaa;
+  white-space: nowrap;
+
 }
 
 .tab-panel {
