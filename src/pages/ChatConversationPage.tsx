@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
@@ -52,6 +53,7 @@ const avatars: Avatar[] = [
 
 interface Message {
   id: number;
+  uuid: string;
   from: string;
   text: string;
   delay: number;
@@ -68,15 +70,14 @@ interface Conversation {
 }
 
 const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0, status: 'draft' }],
-  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0, status: 'draft' }],
-  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0, status: 'draft' }],
-  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', delay: 0, status: 'draft' }],
-  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', delay: 0, status: 'draft' }],
-  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0, status: 'draft' }],
-  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0, status: 'draft' }],
-  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0, status: 'draft' }],
-
+  kursat: [{ id: 1, uuid: uuidv4(), from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0, status: 'draft' }],
+  emre: [{ id: 1, uuid: uuidv4(), from: 'emre', text: 'Send me our photos.', delay: 0, status: 'draft' }],
+  abdurrahim: [{ id: 1, uuid: uuidv4(), from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0, status: 'draft' }],
+  esra: [{ id: 1, uuid: uuidv4(), from: 'esra', text: 'I need a random voice.', delay: 0, status: 'draft' }],
+  bensu: [{ id: 1, uuid: uuidv4(), from: 'bensu', text: 'Send your location.', delay: 0, status: 'draft' }],
+  burhan: [{ id: 1, uuid: uuidv4(), from: 'burhan', text: 'Recommend me some songs.', delay: 0, status: 'draft' }],
+  abdurrahman: [{ id: 1, uuid: uuidv4(), from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0, status: 'draft' }],
+  ahmet: [{ id: 1, uuid: uuidv4(), from: 'ahmet', text: "Let's join the daily meeting.", delay: 0, status: 'draft' }],
 };
 
 
@@ -86,7 +87,7 @@ const ChatConversationPage: React.FC = () => {
   const initialStart = new Date();
   const [conversations, setConversations] = useState<Conversation[]>([
     {
-      id: `conv-${Math.random().toString(36).slice(2, 10)}`,
+      id: uuidv4(),
       startDateTime: initialStart,
       messages: initialMessages[id ?? ''] || [],
     },
@@ -120,7 +121,7 @@ const ChatConversationPage: React.FC = () => {
       const g = groups.find((gr: any) => gr.groupId === id);
       if (g && g.conversations) {
         const convs: Conversation[] = g.conversations.map((c: any) => ({
-          id: c.conversationId || c.id,
+          id: c.conversationId || c.id || uuidv4(),
           startDateTime: new Date(c.createdAt || new Date()),
           messages: (c.messages || []).map((m: any, idx: number) => {
             const type = (c.type || '').toLowerCase();
@@ -130,6 +131,7 @@ const ChatConversationPage: React.FC = () => {
 
             return {
               id: idx + 1,
+              uuid: m.message_id || m.uuid || uuidv4(),
               from: m.sender_id || m.from || avatars[0].id,
               text: m.text || m.message_content || '',
               delay: 0,
@@ -199,7 +201,7 @@ const ChatConversationPage: React.FC = () => {
           const relative = idx === 0 ? 0 : m.delay * 60;
 
           return {
-            message_id: `m-${m.id}`,
+            message_id: m.uuid,
             sender_id: m.from,
             sender_name: m.from,
             message_content: m.text,
@@ -364,6 +366,7 @@ const handleSend = () => {
       ...prev,
       {
         id: newId,
+        uuid: uuidv4(),
         from: selectedAvatar.id,
         text,
         delay: 0,
@@ -468,6 +471,7 @@ const handleSend = () => {
         const from = others[i % count].id;
         generated.push({
           id: ++nextId,
+          uuid: uuidv4(),
           from,
           text: `Auto message ${i + 1}`,
           delay: 0,
@@ -607,13 +611,11 @@ const handleInputChange = (
                     if (isLast) {
                       setConversations((prev) => [
                         ...prev,
-                        {
-                          id: `conv-${Math.random()
-                            .toString(36)
-                            .slice(2, 10)}`,
-                          startDateTime: new Date(),
-                          messages: [],
-                        },
+                          {
+                            id: uuidv4(),
+                            startDateTime: new Date(),
+                            messages: [],
+                          },
                       ]);
                       setConversationIndex(conversations.length);
                     } else {
