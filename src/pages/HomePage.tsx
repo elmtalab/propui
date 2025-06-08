@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRawInitData } from '@telegram-apps/sdk-react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
@@ -16,20 +17,31 @@ interface TelegramInitData {
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [initData, setInitData] = useState<TelegramInitData | null>(null);
+  const rawInitData = useRawInitData();
 
   useEffect(() => {
     let data: TelegramInitData | null = null;
-    const tg = (window as any).Telegram?.WebApp;
-    if (tg && tg.initDataUnsafe) {
-      data = tg.initDataUnsafe;
-    } else {
+    if (rawInitData) {
       try {
-        const stored = localStorage.getItem('tg_init_data');
-        if (stored) {
-          data = JSON.parse(stored);
-        }
+        data = JSON.parse(rawInitData);
       } catch {
-        // ignore read errors
+        // ignore parse errors
+      }
+    }
+    if (!data) {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg && tg.initDataUnsafe) {
+        data = tg.initDataUnsafe;
+      } else {
+        try {
+          const stored = localStorage.getItem('tg_init_data');
+          if (stored) {
+            data = JSON.parse(stored);
+          }
+        } catch {
+          // ignore read errors
+        }
+
       }
     }
     if (data) {
@@ -40,7 +52,7 @@ const HomePage: React.FC = () => {
         // ignore write errors
       }
     }
-  }, []);
+  }, [rawInitData]);
 
   return (
     <div className="App">
