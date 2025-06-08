@@ -244,7 +244,7 @@ const ChatInboxPage: React.FC = () => {
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
   const draftChats = draftGroups.map(mapChat);
-  const groupListChats = groups.map(mapChat);
+  const groupChats = groups.map(mapChat);
 
   const mapUserGroup = (g: any) => ({
     id: g.group.id,
@@ -374,7 +374,7 @@ const ChatInboxPage: React.FC = () => {
       <TabPanel value={tabIndex} index={3}>
         <ChatList
           className="chat-list"
-          dataSource={groupListChats}
+          dataSource={groupChats}
           onClick={(item: any) => {
             navigate(`/chat/${(item as any).id}`);
           }}
