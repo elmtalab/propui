@@ -163,6 +163,7 @@ const ChatInboxPage: React.FC = () => {
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
   const draftChats = draftGroups.map(mapChat);
+  const groupListChats = groups.map(mapChat);
 
   const [tabIndex, setTabIndex] = useState(0);
   const [viewportHeight, setViewportHeight] = useState<number>(
@@ -250,6 +251,7 @@ const ChatInboxPage: React.FC = () => {
           <Tab label="Executed" {...a11yProps(0)} />
           <Tab label="Scheduled" {...a11yProps(1)} />
           <Tab label="Draft" {...a11yProps(2)} />
+          <Tab label="Group List" {...a11yProps(3)} />
         </Tabs>
       </Box>
       <TabPanel value={tabIndex} index={0}>
@@ -274,6 +276,15 @@ const ChatInboxPage: React.FC = () => {
         <ChatList
           className="chat-list"
           dataSource={draftChats}
+          onClick={(item: any) => {
+            navigate(`/chat/${(item as any).id}`);
+          }}
+        />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={3}>
+        <ChatList
+          className="chat-list"
+          dataSource={groupListChats}
           onClick={(item: any) => {
             navigate(`/chat/${(item as any).id}`);
           }}
