@@ -62,6 +62,66 @@ const groupCategories: Record<string, string[]> = {
   Movies: ['Sci-Fi Lovers', 'Comedy Club'],
 };
 
+// Merge helper functions to preserve locally drafted messages when
+// conversations from the API are loaded.
+const mergeMessages = (remote: any[] = [], local: any[] = []) => {
+  const result = [...remote];
+  local.forEach((m) => {
+    const text = m.message_content ?? m.text ?? '';
+    const from = m.sender_id ?? m.from;
+    const exists = result.some(
+      (r) =>
+        (r.message_content ?? r.text ?? '') === text &&
+        (r.sender_id ?? r.from) === from
+    );
+    if (!exists) {
+      result.push(m);
+    }
+  });
+  return result;
+};
+
+const mergeConversations = (remote: any[] = [], local: any[] = []) => {
+  const map: Record<string, any> = {};
+  remote.forEach((c) => {
+    const key = c.conversationId ?? c.id;
+    map[key] = { ...c, messages: c.messages || [] };
+  });
+  local.forEach((c) => {
+    const key = c.conversationId ?? c.id;
+    if (!map[key]) {
+      map[key] = { ...c, messages: c.messages || [] };
+    } else {
+      map[key].messages = mergeMessages(map[key].messages, c.messages || []);
+    }
+  });
+  return Object.values(map);
+};
+
+const mergeGroups = (remote: any[] = [], local: any[] = []) => {
+  const map: Record<string, any> = {};
+  remote.forEach((g) => {
+    map[g.groupId] = {
+      groupId: g.groupId,
+      conversations: g.conversations || [],
+    };
+  });
+  local.forEach((g) => {
+    if (!map[g.groupId]) {
+      map[g.groupId] = {
+        groupId: g.groupId,
+        conversations: g.conversations || [],
+      };
+    } else {
+      map[g.groupId].conversations = mergeConversations(
+        map[g.groupId].conversations,
+        g.conversations || []
+      );
+    }
+  });
+  return Object.values(map);
+};
+
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<any[]>([]);
@@ -98,28 +158,21 @@ const ChatInboxPage: React.FC = () => {
           map[c.groupId].conversations.push(c);
         });
 
+        const remoteGroups = Object.values(map);
+
         const stored = localStorage.getItem('conversations');
+        let mergedGroups = remoteGroups;
         if (stored) {
           try {
             const localGroups = JSON.parse(stored);
-            localGroups.forEach((g: any) => {
-              if (!map[g.groupId]) {
-                map[g.groupId] = { groupId: g.groupId, conversations: g.conversations || [] };
-              } else if (Array.isArray(g.conversations)) {
-                map[g.groupId].conversations = [
-                  ...map[g.groupId].conversations,
-                  ...g.conversations,
-                ];
-              }
-            });
+            mergedGroups = mergeGroups(remoteGroups, localGroups);
           } catch {
             /* ignore */
           }
         }
 
-        const grouped = Object.values(map);
-        setGroups(grouped);
-        localStorage.setItem('conversations', JSON.stringify(grouped));
+        setGroups(mergedGroups);
+        localStorage.setItem('conversations', JSON.stringify(mergedGroups));
       })
       .catch(() => {
         const stored = localStorage.getItem('conversations');
