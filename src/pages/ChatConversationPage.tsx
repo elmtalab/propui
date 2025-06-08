@@ -53,6 +53,8 @@ interface Message {
   text: string;
   delay: number;
 
+  status?: string;
+
   replyTo?: number;
 }
 
@@ -63,14 +65,14 @@ interface Conversation {
 }
 
 const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0 }],
-  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0 }],
-  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0 }],
-  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', delay: 0 }],
-  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', delay: 0 }],
-  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0 }],
-  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0 }],
-  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0 }],
+  kursat: [{ id: 1, from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0, status: 'draft' }],
+  emre: [{ id: 1, from: 'emre', text: 'Send me our photos.', delay: 0, status: 'draft' }],
+  abdurrahim: [{ id: 1, from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0, status: 'draft' }],
+  esra: [{ id: 1, from: 'esra', text: 'I need a random voice.', delay: 0, status: 'draft' }],
+  bensu: [{ id: 1, from: 'bensu', text: 'Send your location.', delay: 0, status: 'draft' }],
+  burhan: [{ id: 1, from: 'burhan', text: 'Recommend me some songs.', delay: 0, status: 'draft' }],
+  abdurrahman: [{ id: 1, from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0, status: 'draft' }],
+  ahmet: [{ id: 1, from: 'ahmet', text: "Let's join the daily meeting.", delay: 0, status: 'draft' }],
 
 };
 
@@ -119,9 +121,9 @@ const ChatConversationPage: React.FC = () => {
           messages: (c.messages || []).map((m: any, idx: number) => ({
             id: idx + 1,
             from: m.sender_id || m.from || avatars[0].id,
-
             text: m.text || m.message_content || '',
             delay: 0,
+            status: m.status || 'draft',
           })),
         }));
         if (convs.length) {
@@ -236,6 +238,7 @@ const handleSend = () => {
         from: selectedAvatar.id,
         text,
         delay: 0,
+        status: 'draft',
         replyTo: replyTo?.id,
       },
     ];
@@ -290,15 +293,11 @@ const handleSend = () => {
 
   const handleSchedule = () => {
     setGenerating(true);
-    const stored = localStorage.getItem('tg_init_data');
-    const telegramId = stored ? JSON.parse(stored).user?.id : null;
     const conv = conversations[conversationIndex];
-    const payload = {
-      telegramId,
-      groupId: id,
-      messages: conv.messages.map((m) => ({ text: m.text })),
-      type: 'Scheduled',
-    };
+    const updatedMessages = conv.messages.map((m) => ({ ...m, status: 'pending' }));
+    const tempConvs = [...conversations];
+    tempConvs[conversationIndex] = { ...conv, messages: updatedMessages };
+    const payload = generateJSON(tempConvs);
     try {
       const ls = localStorage.getItem('conversations');
       const groups = ls ? JSON.parse(ls) : [];
@@ -306,7 +305,7 @@ const handleSend = () => {
       const convData = {
         conversationId: conv.id,
         createdAt: conv.startDateTime,
-        messages: conv.messages,
+        messages: updatedMessages,
         type: 'Scheduled',
       };
       if (idx === -1) {
@@ -315,10 +314,15 @@ const handleSend = () => {
         groups[idx].conversations = [convData];
       }
       localStorage.setItem('conversations', JSON.stringify(groups));
+      setConversations((prev) => {
+        const next = [...prev];
+        next[conversationIndex] = { ...next[conversationIndex], messages: updatedMessages };
+        return next;
+      });
     } catch {
       /* ignore */
     }
-    fetch('https://prop-backend-worker.elmtalabx.workers.dev/api/conversations', {
+    fetch('https://prop-backend-worker.elmtalabx.workers.dev/api/ledger', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -333,8 +337,8 @@ const handleSend = () => {
     return new Date(startDateTime.getTime() + total * 60000).toISOString();
   };
 
-  const generateJSON = () => {
-    const conversationsJson = conversations.map((conv) => {
+  const generateJSON = (convList: Conversation[] = conversations) => {
+    const conversationsJson = convList.map((conv) => {
       let cumulative = 0;
       const start = conv.startDateTime.getTime();
       const msgs = conv.messages.map((m, idx) => {
@@ -371,14 +375,14 @@ const handleSend = () => {
     });
 
     const memberSet = new Set(
-      conversations.flatMap((c) => c.messages.map((m) => m.from))
+      convList.flatMap((c) => c.messages.map((m) => m.from))
     );
     const members = Array.from(memberSet).map((u) => ({
       telegram_user_id: u,
       telegram_user_name: u,
       role: 'member',
       status: 'active',
-      joined_at: conversations[0].startDateTime.toISOString(),
+      joined_at: convList[0].startDateTime.toISOString(),
     }));
 
 
