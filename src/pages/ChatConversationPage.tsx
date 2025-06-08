@@ -101,6 +101,8 @@ const ChatConversationPage: React.FC = () => {
     { id: null, dx: 0 }
   );
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
+  const [delayMenuPosition, setDelayMenuPosition] =
+    useState<{ x: number; y: number } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
@@ -411,6 +413,8 @@ const handleInputChange = (
       onClick={() => {
         setMenuId(null);
         setMenuPosition(null);
+        setDelayMenuId(null);
+        setDelayMenuPosition(null);
       }}
       
     >
@@ -497,23 +501,21 @@ const handleInputChange = (
       >
         <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
+        <Button
+          className="generate-btn schedule-btn"
+          onClick={handleGenerateAI}
+          disabled={generating}
+        >
+          {generating ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            <>
+              <AutoAwesomeIcon style={{ marginRight: 4 }} />
+              Schedule
+            </>
+          )}
+        </Button>
       </div>
-      <Button
-        className="generate-btn"
-        onClick={handleGenerateAI}
-        disabled={generating}
-        fullWidth
-        style={{ marginBottom: 8 }}
-      >
-        {generating ? (
-          <CircularProgress size={20} color="inherit" />
-        ) : (
-          <>
-            <AutoAwesomeIcon style={{ marginRight: 4 }} />
-            Generate a conversation with AI
-          </>
-        )}
-      </Button>
       <div
         className={`chat-messages ${
           transitionDir ? `animate-${transitionDir}` : ''
@@ -534,9 +536,13 @@ const handleInputChange = (
               {idx > 0 && (
                 <span
                   className={`delay-wrapper ${me ? 'left' : 'right'}`}
-                  onClick={() =>
-                    setDelayMenuId(delayMenuId === msg.id ? null : msg.id)
-                  }
+                  onClick={(e) => {
+                    const rect = (
+                      e.currentTarget as HTMLElement
+                    ).getBoundingClientRect();
+                    setDelayMenuPosition({ x: rect.right, y: rect.top - 40 });
+                    setDelayMenuId(delayMenuId === msg.id ? null : msg.id);
+                  }}
                 >
                   <IconButton
                     className="delay-btn"
@@ -546,7 +552,14 @@ const handleInputChange = (
                     <TimerIcon fontSize="inherit" />
                   </IconButton>
                   {delayMenuId === msg.id && (
-                    <div className={`message-menu ${me ? 'left' : 'right'}`}>
+                    <div
+                      className="message-menu"
+                      style={{
+                        left: delayMenuPosition?.x,
+                        top: delayMenuPosition?.y,
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
                       <button onClick={() => handleResetDelay(msg.id)}>Reset</button>
                       {[1, 2, 3, 5].map((m) => (
                         <button
