@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
@@ -151,6 +151,84 @@ const ChatConversationPage: React.FC = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
 
+  const generateJSON = useCallback(
+    (convList: Conversation[] = conversations) => {
+      const conversationsJson = convList.map((conv) => {
+        let cumulative = 0;
+        const start = conv.startDateTime.getTime();
+        const msgs = conv.messages.map((m, idx) => {
+          if (idx > 0) {
+            cumulative += m.delay;
+          }
+          const timestamp = new Date(start + cumulative * 60000).toISOString();
+          const relative = idx === 0 ? 0 : m.delay * 60;
+
+          return {
+            message_id: `m-${m.id}`,
+            sender_id: m.from,
+            sender_name: m.from,
+            message_content: m.text,
+            message_type: 'text',
+            timestamp,
+            relative_time: relative,
+            status: m.status || 'pending',
+            metadata: {
+              language: 'en',
+            },
+          };
+        });
+
+
+        return {
+          conversation_id: conv.id,
+          start_time: conv.startDateTime.toISOString(),
+          initiated_by: conv.messages[0]?.from || selectedAvatar.id,
+          topic: '',
+          conversation_metadata: { active: true, tags: [] },
+          messages: msgs,
+        };
+      });
+
+      const memberSet = new Set(
+        convList.flatMap((c) => c.messages.map((m) => m.from))
+      );
+      const members = Array.from(memberSet).map((u) => ({
+        telegram_user_id: u,
+        telegram_user_name: u,
+        role: 'member',
+        status: 'active',
+        joined_at: convList[0].startDateTime.toISOString(),
+      }));
+
+
+      return {
+        system_metadata: {
+          version: '1.0.1',
+          generated_at: new Date().toISOString(),
+          timezone: 'UTC',
+          description:
+            'Ledger of AI-only outbound interactions inside Telegram groups',
+        },
+        groups: [
+          {
+            group_id: id,
+            group_name: id,
+            privacy_level: 'public',
+            created_at: new Date().toISOString(),
+            created_by: 123456789,
+            group_description: '',
+            members,
+            conversations: conversationsJson,
+
+          },
+        ],
+        ai_users: [],
+        audit_log: [],
+      };
+    },
+    [conversations, id, selectedAvatar]
+  );
+
   useEffect(() => {
     const ls = localStorage.getItem('conversations');
     const groups = ls ? JSON.parse(ls) : [];
@@ -170,7 +248,8 @@ const ChatConversationPage: React.FC = () => {
       const ledgerKey = `draft-json-${id}`;
       localStorage.setItem(ledgerKey, JSON.stringify(generateJSON()));
     }
-  }, [conversations, id]);
+ }, [conversations, id, generateJSON]);
+
 
 
 
@@ -373,80 +452,6 @@ const handleSend = () => {
     return new Date(startDateTime.getTime() + total * 60000).toISOString();
   };
 
-  const generateJSON = (convList: Conversation[] = conversations) => {
-    const conversationsJson = convList.map((conv) => {
-      let cumulative = 0;
-      const start = conv.startDateTime.getTime();
-      const msgs = conv.messages.map((m, idx) => {
-        if (idx > 0) {
-          cumulative += m.delay;
-        }
-        const timestamp = new Date(start + cumulative * 60000).toISOString();
-        const relative = idx === 0 ? 0 : m.delay * 60;
-
-        return {
-          message_id: `m-${m.id}`,
-          sender_id: m.from,
-          sender_name: m.from,
-          message_content: m.text,
-          message_type: 'text',
-          timestamp,
-          relative_time: relative,
-          status: m.status || 'pending',
-          metadata: {
-            language: 'en',
-          },
-        };
-      });
-
-
-      return {
-        conversation_id: conv.id,
-        start_time: conv.startDateTime.toISOString(),
-        initiated_by: conv.messages[0]?.from || selectedAvatar.id,
-        topic: '',
-        conversation_metadata: { active: true, tags: [] },
-        messages: msgs,
-      };
-    });
-
-    const memberSet = new Set(
-      convList.flatMap((c) => c.messages.map((m) => m.from))
-    );
-    const members = Array.from(memberSet).map((u) => ({
-      telegram_user_id: u,
-      telegram_user_name: u,
-      role: 'member',
-      status: 'active',
-      joined_at: convList[0].startDateTime.toISOString(),
-    }));
-
-
-    return {
-      system_metadata: {
-        version: '1.0.1',
-        generated_at: new Date().toISOString(),
-        timezone: 'UTC',
-        description:
-          'Ledger of AI-only outbound interactions inside Telegram groups',
-      },
-      groups: [
-        {
-          group_id: id,
-          group_name: id,
-          privacy_level: 'public',
-          created_at: new Date().toISOString(),
-          created_by: 123456789,
-          group_description: '',
-          members,
-          conversations: conversationsJson,
-
-        },
-      ],
-      ai_users: [],
-      audit_log: [],
-    };
-  };
 
 const handleInputChange = (
   e: React.ChangeEvent<HTMLTextAreaElement>
