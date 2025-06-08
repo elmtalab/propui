@@ -1,11 +1,10 @@
 :root {
-  --tg-bg-color: var(--tg-theme-bg-color, #ffffff);
-  --tg-text-color: var(--tg-theme-text-color, #000000);
-  --tg-secondary-bg-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-  --tg-button-color: var(--tg-theme-button-color, #0088cc);
-  --tg-button-text-color: var(--tg-theme-button-text-color, #ffffff);
-  --tg-link-color: var(--tg-theme-link-color, #61dafb);
-  --tg-border-color: #ccc;
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --secondary-bg-color: #f5f5f5;
+  --border-color: #ddd;
+  --button-color: #0088cc;
+  --button-text-color: #ffffff;
 }
 
 body {
@@ -15,28 +14,12 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  height: 100dvh;
+  height: 100vh;
   overflow: hidden;
-  background: var(--tg-bg-color);
-  color: var(--tg-text-color);
-}
-
-body.tg-dark {
-  color-scheme: dark;
-  --tg-border-color: #444;
-  --tg-bg-color: var(--tg-theme-bg-color, #1f1f1f);
-  --tg-text-color: var(--tg-theme-text-color, #ffffff);
-  --tg-secondary-bg-color: var(
-    --tg-theme-secondary-bg-color,
-    #2a2a2a
-  );
-  --tg-button-color: var(--tg-theme-button-color, #0088cc);
-  --tg-button-text-color: var(--tg-theme-button-text-color, #ffffff);
-  --tg-link-color: var(--tg-theme-link-color, #61dafb);
-
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
