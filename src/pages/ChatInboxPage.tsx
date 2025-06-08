@@ -95,6 +95,26 @@ const ChatInboxPage: React.FC = () => {
           }
           map[c.groupId].conversations.push(c);
         });
+
+        const stored = localStorage.getItem('conversations');
+        if (stored) {
+          try {
+            const localGroups = JSON.parse(stored);
+            localGroups.forEach((g: any) => {
+              if (!map[g.groupId]) {
+                map[g.groupId] = { groupId: g.groupId, conversations: g.conversations || [] };
+              } else if (Array.isArray(g.conversations)) {
+                map[g.groupId].conversations = [
+                  ...map[g.groupId].conversations,
+                  ...g.conversations,
+                ];
+              }
+            });
+          } catch {
+            /* ignore */
+          }
+        }
+
         const grouped = Object.values(map);
         setGroups(grouped);
         localStorage.setItem('conversations', JSON.stringify(grouped));
@@ -106,18 +126,25 @@ const ChatInboxPage: React.FC = () => {
   }, []);
 
   const executedGroups = groups.filter((g) =>
-    g.conversations?.some((c: any) =>
-      c.messages?.some((m: any) => m.status === 'executed')
+    g.conversations?.some(
+      (c: any) =>
+        c.type === 'Executed' ||
+        c.messages?.some((m: any) => m.status === 'executed')
     )
   );
   const scheduledGroups = groups.filter((g) =>
-    g.conversations?.some((c: any) =>
-      c.messages?.some((m: any) => m.status === 'pending')
+    g.conversations?.some(
+      (c: any) =>
+        c.type === 'Scheduled' ||
+        c.messages?.some((m: any) => m.status === 'pending')
     )
   );
   const draftGroups = groups.filter((g) =>
-    g.conversations?.some((c: any) =>
-      c.messages?.some((m: any) => !m.status || m.status === 'draft')
+    g.conversations?.some(
+      (c: any) =>
+        !c.type || c.type === 'Draft' ||
+        c.messages?.some((m: any) => !m.status || m.status === 'draft')
+
     )
   );
 

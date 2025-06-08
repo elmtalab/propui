@@ -121,13 +121,21 @@ const ChatConversationPage: React.FC = () => {
         const convs: Conversation[] = g.conversations.map((c: any) => ({
           id: c.conversationId || c.id,
           startDateTime: new Date(c.createdAt || new Date()),
-          messages: (c.messages || []).map((m: any, idx: number) => ({
-            id: idx + 1,
-            from: m.sender_id || m.from || avatars[0].id,
-            text: m.text || m.message_content || '',
-            delay: 0,
-            status: m.status || 'draft',
-          })),
+          messages: (c.messages || []).map((m: any, idx: number) => {
+            const type = (c.type || '').toLowerCase();
+            let defaultStatus: string = 'draft';
+            if (type === 'executed') defaultStatus = 'executed';
+            else if (type === 'scheduled' || type === 'pending') defaultStatus = 'pending';
+
+            return {
+              id: idx + 1,
+              from: m.sender_id || m.from || avatars[0].id,
+              text: m.text || m.message_content || '',
+              delay: 0,
+              status: m.status || defaultStatus,
+            };
+          }),
+
         }));
         if (convs.length) {
           setConversations(convs);
@@ -359,7 +367,7 @@ const handleSend = () => {
           message_type: 'text',
           timestamp,
           relative_time: relative,
-          status: 'pending',
+          status: m.status || 'pending',
           metadata: {
             language: 'en',
           },
