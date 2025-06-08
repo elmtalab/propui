@@ -27,6 +27,9 @@ import PaginationItem from '@mui/material/PaginationItem';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 
 import { Link, useParams } from 'react-router-dom';
 
@@ -742,7 +745,19 @@ const handleInputChange = (
                 {reply && <div className="reply-text">{reply.text}</div>}
                 {msg.text}
                 <div className="message-time">
-                  {new Date(computeTimestamp(idx)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(computeTimestamp(idx)).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                  {msg.status === 'draft' && (
+                    <AccessTimeIcon className="status-icon" fontSize="inherit" />
+                  )}
+                  {msg.status === 'pending' && (
+                    <DoneIcon className="status-icon" fontSize="inherit" />
+                  )}
+                  {msg.status === 'executed' && (
+                    <DoneAllIcon className="status-icon" fontSize="inherit" />
+                  )}
                 </div>
                 {menuId === msg.id && (
                   <div
