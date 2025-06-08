@@ -229,22 +229,25 @@ const ChatInboxPage: React.FC = () => {
     )
   );
 
-  const mapChat = (g: any) => ({
-    id: g.groupId,
-    avatar: '',
-    alt: g.groupId,
-    title: g.groupId,
-    subtitle:
-      g.conversations?.[g.conversations.length - 1]?.messages?.slice(-1)[0]?.text ||
-      '',
-    date: new Date(),
-    unread: 0,
-  });
+  const mapChat = (g: any) => {
+    const groupId = g.groupId ?? g.group?.id;
+    return {
+      id: groupId,
+      avatar: '',
+      alt: g.group?.title ?? groupId,
+      title: g.group?.title ?? groupId,
+      subtitle:
+        g.conversations?.[g.conversations.length - 1]?.messages?.slice(-1)[0]
+          ?.text || '',
+      date: new Date(),
+      unread: 0,
+    };
+  };
 
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
   const draftChats = draftGroups.map(mapChat);
- const groupChats = groups.map(mapChat);
+  const groupChats = (userGroups.length ? userGroups : groups).map(mapChat);
 
 
 
@@ -366,8 +369,7 @@ const ChatInboxPage: React.FC = () => {
       <TabPanel value={tabIndex} index={3}>
         <ChatList
           className="chat-list"
-        dataSource={groupChats}
-
+          dataSource={groupChats}
           onClick={(item: any) => {
             navigate(`/chat/${(item as any).id}`);
           }}
