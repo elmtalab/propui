@@ -21,27 +21,34 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     let data: TelegramInitData | null = null;
-    if (rawInitData) {
+    const tg = (window as any).Telegram?.WebApp;
+    const str = tg?.initData;
+    if (tg?.initDataUnsafe) {
+      data = tg.initDataUnsafe;
+    } else if (str) {
       try {
-        data = JSON.parse(rawInitData);
+        const params = new URLSearchParams(str);
+        const obj: Record<string, any> = {};
+        params.forEach((v, k) => {
+          obj[k] = v;
+        });
+        if (obj.user) {
+          obj.user = JSON.parse(obj.user);
+        }
+        data = obj as TelegramInitData;
+
       } catch {
-        // ignore parse errors
+        /* ignore */
       }
     }
     if (!data) {
-      const tg = (window as any).Telegram?.WebApp;
-      if (tg && tg.initDataUnsafe) {
-        data = tg.initDataUnsafe;
-      } else {
+      const stored = localStorage.getItem('tg_init_data');
+      if (stored) {
         try {
-          const stored = localStorage.getItem('tg_init_data');
-          if (stored) {
-            data = JSON.parse(stored);
-          }
+          data = JSON.parse(stored);
         } catch {
-          // ignore read errors
+          /* ignore */
         }
-
       }
     }
     if (data) {
@@ -49,7 +56,7 @@ const HomePage: React.FC = () => {
       try {
         localStorage.setItem('tg_init_data', JSON.stringify(data));
       } catch {
-        // ignore write errors
+        /* ignore */
       }
     }
   }, [rawInitData]);
