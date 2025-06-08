@@ -249,6 +249,7 @@ const ChatInboxPage: React.FC = () => {
       dateString: lastMsg.createdAt
         ? new Date(lastMsg.createdAt).toLocaleString()
         : undefined,
+
       unread: 0,
     };
   };
@@ -452,6 +453,7 @@ const ChatInboxPage: React.FC = () => {
         ) : (
           <p className="empty-message">No groups found. Tap + to add one.</p>
         )}
+
       </TabPanel>
 
       <SpeedDial

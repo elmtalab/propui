@@ -441,6 +441,7 @@
 /* Chat list items */
 .chat-list .rce-citem {
   padding: 8px 12px;
+
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--tg-border-color);
@@ -471,6 +472,7 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+
 }
 
 .fab .MuiFab-root {
