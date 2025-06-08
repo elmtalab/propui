@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../logo.svg';
 import '../App.css';
 
 interface TelegramInitData {
@@ -19,13 +18,42 @@ const HomePage: React.FC = () => {
   const [initData, setInitData] = useState<TelegramInitData | null>(null);
 
   useEffect(() => {
+    let data: TelegramInitData | null = null;
     const tg = (window as any).Telegram?.WebApp;
-    if (tg && tg.initDataUnsafe) {
-      setInitData(tg.initDataUnsafe);
+    const str = tg?.initData;
+    if (tg?.initDataUnsafe) {
+      data = tg.initDataUnsafe;
+    } else if (str) {
       try {
-        localStorage.setItem('tg_init_data', JSON.stringify(tg.initDataUnsafe));
+        const params = new URLSearchParams(str);
+        const obj: Record<string, any> = {};
+        params.forEach((v, k) => {
+          obj[k] = v;
+        });
+        if (obj.user) {
+          obj.user = JSON.parse(obj.user);
+        }
+        data = obj as TelegramInitData;
       } catch {
-        // ignore write errors
+        /* ignore */
+      }
+    }
+    if (!data) {
+      const stored = localStorage.getItem('tg_init_data');
+      if (stored) {
+        try {
+          data = JSON.parse(stored);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    if (data) {
+      setInitData(data);
+      try {
+        localStorage.setItem('tg_init_data', JSON.stringify(data));
+      } catch {
+        /* ignore */
       }
     }
   }, []);
@@ -33,15 +61,14 @@ const HomePage: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         {initData?.user && (
           <>
             <p>
-              Logged in as {initData.user.first_name}{' '}
+              {initData.user.first_name}{' '}
               {initData.user.last_name ?? ''}
               {initData.user.username ? ` (@${initData.user.username})` : ''}
             </p>
-            <p>User ID: {initData.user.id}</p>
+            <p>Telegram ID: {initData.user.id}</p>
           </>
 
         )}
