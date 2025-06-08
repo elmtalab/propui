@@ -491,6 +491,7 @@ const ChatInboxPage: React.FC = () => {
       </TabPanel>
 
 
+
       <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
         <DialogTitle>Select Groups</DialogTitle>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
