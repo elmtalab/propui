@@ -505,6 +505,7 @@ const handleInputChange = (
           className="generate-btn schedule-btn"
           onClick={handleGenerateAI}
           disabled={generating}
+
         >
           {generating ? (
             <CircularProgress size={20} color="inherit" />
