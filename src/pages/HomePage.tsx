@@ -35,11 +35,15 @@ const HomePage: React.FC = () => {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         {initData?.user && (
-          <p>
-            Logged in as {initData.user.first_name}{' '}
-            {initData.user.last_name ?? ''}
-            {initData.user.username ? ` (@${initData.user.username})` : ''}
-          </p>
+          <>
+            <p>
+              Logged in as {initData.user.first_name}{' '}
+              {initData.user.last_name ?? ''}
+              {initData.user.username ? ` (@${initData.user.username})` : ''}
+            </p>
+            <p>User ID: {initData.user.id}</p>
+          </>
+
         )}
         {initData && (
           <pre

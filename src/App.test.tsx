@@ -7,3 +7,13 @@ test('renders go to chat button', () => {
   const btnElement = screen.getByRole('button', { name: /go to chat/i });
   expect(btnElement).toBeInTheDocument();
 });
+
+test('shows user id when telegram data available', () => {
+  (window as any).Telegram = {
+    WebApp: { initDataUnsafe: { user: { id: 42, first_name: 'Foo' } } },
+  };
+  render(<App />);
+  expect(screen.getByText(/user id: 42/i)).toBeInTheDocument();
+  delete (window as any).Telegram;
+
+});
