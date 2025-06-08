@@ -118,7 +118,8 @@ const ChatConversationPage: React.FC = () => {
           startDateTime: new Date(c.createdAt || new Date()),
           messages: (c.messages || []).map((m: any, idx: number) => ({
             id: idx + 1,
-            from: m.sender_id || m.from || selectedAvatar.id,
+            from: m.sender_id || m.from || avatars[0].id,
+
             text: m.text || m.message_content || '',
             delay: 0,
           })),
