@@ -503,6 +503,10 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+}
+
+.tab-panel[hidden] {
+  display: none !important;
 
 }
 
