@@ -18,11 +18,24 @@ const HomePage: React.FC = () => {
   const [initData, setInitData] = useState<TelegramInitData | null>(null);
 
   useEffect(() => {
+    let data: TelegramInitData | null = null;
     const tg = (window as any).Telegram?.WebApp;
     if (tg && tg.initDataUnsafe) {
-      setInitData(tg.initDataUnsafe);
+      data = tg.initDataUnsafe;
+    } else {
       try {
-        localStorage.setItem('tg_init_data', JSON.stringify(tg.initDataUnsafe));
+        const stored = localStorage.getItem('tg_init_data');
+        if (stored) {
+          data = JSON.parse(stored);
+        }
+      } catch {
+        // ignore read errors
+      }
+    }
+    if (data) {
+      setInitData(data);
+      try {
+        localStorage.setItem('tg_init_data', JSON.stringify(data));
       } catch {
         // ignore write errors
       }

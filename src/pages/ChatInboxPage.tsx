@@ -67,8 +67,20 @@ const ChatInboxPage: React.FC = () => {
   const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
+    let tgId: number | null = null;
     const tgStr = localStorage.getItem('tg_init_data');
-    const tgId = tgStr ? JSON.parse(tgStr).user?.id : null;
+    if (tgStr) {
+      try {
+        tgId = JSON.parse(tgStr).user?.id ?? null;
+      } catch {
+        // ignore
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ?? null;
+    }
+
     if (!tgId) return;
     fetch(
       `https://prop-backend-worker.elmtalabx.workers.dev/api/user-conversations?telegramId=${tgId}`
