@@ -426,6 +426,11 @@ const handleInputChange = (
           alt={id}
         />
         <span className="header-name">{id}</span>
+        <DateTimePicker
+          className="header-datetime"
+          onChange={(d) => d && updateStartDateTime(d)}
+          value={startDateTime}
+        />
       </div>
       <div className="conversation-nav">
         <Pagination
@@ -499,8 +504,6 @@ const handleInputChange = (
         className="start-time-inputs"
         style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
       >
-        <span style={{ fontSize: 14 }}>Executed at</span>
-        <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
         <Button
           className="generate-btn schedule-btn"
           onClick={handleGenerateAI}
@@ -538,6 +541,7 @@ const handleInputChange = (
                 <span
                   className={`delay-wrapper ${me ? 'left' : 'right'}`}
                   onClick={(e) => {
+                    e.stopPropagation();
                     const rect = (
                       e.currentTarget as HTMLElement
                     ).getBoundingClientRect();
