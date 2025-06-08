@@ -257,7 +257,6 @@ const ChatInboxPage: React.FC = () => {
     date: new Date(),
     unread: g.group.online_count ?? 0,
   });
-  const groupListChats = userGroups.map(mapUserGroup);
   const [viewportHeight, setViewportHeight] = useState<number>(
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
