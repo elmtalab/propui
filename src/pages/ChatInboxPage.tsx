@@ -191,6 +191,7 @@ const ChatInboxPage: React.FC = () => {
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
   const draftChats = draftGroups.map(mapChat);
+  const groupListChats = groups.map(mapChat);
 
   const mapUserGroup = (g: any) => ({
     id: g.group.id,
