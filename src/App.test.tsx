@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+jest.mock('@telegram-apps/sdk-react', () => ({ useRawInitData: () => undefined }));
 import App from './App';
 
 test('renders go to chat button', () => {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRawInitData } from '@telegram-apps/sdk-react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
@@ -16,6 +17,7 @@ interface TelegramInitData {
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [initData, setInitData] = useState<TelegramInitData | null>(null);
+  const rawInitData = useRawInitData();
 
   useEffect(() => {
     let data: TelegramInitData | null = null;
@@ -34,6 +36,7 @@ const HomePage: React.FC = () => {
           obj.user = JSON.parse(obj.user);
         }
         data = obj as TelegramInitData;
+
       } catch {
         /* ignore */
       }
@@ -56,7 +59,7 @@ const HomePage: React.FC = () => {
         /* ignore */
       }
     }
-  }, []);
+  }, [rawInitData]);
 
   return (
     <div className="App">
