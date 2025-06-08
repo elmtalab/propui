@@ -14,18 +14,18 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: var(--tg-secondary-bg-color);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--tg-text-color);
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--tg-link-color);
 }
 
 .chat-container {
@@ -78,11 +78,12 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--tg-secondary-bg-color);
+  border: 1px solid var(--tg-border-color);
   padding: 4px;
   border-radius: 4px;
   z-index: 1000;
+  color: var(--tg-text-color);
 }
 
 .message-menu button {
@@ -100,7 +101,7 @@
 .message-time {
   font-size: 10px;
   margin-top: 4px;
-  color: #333;
+  color: var(--tg-text-color);
   display: flex;
   align-items: center;
   gap: 2px;
@@ -142,12 +143,11 @@
 
 .reply-text {
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  color: #000;
+  background: var(--tg-secondary-bg-color);
+  color: var(--tg-text-color);
   padding: 2px 4px;
   border-radius: 4px;
   margin-bottom: 4px;
-
 }
 
 .message-input-container {
@@ -158,8 +158,8 @@
   left: 0;
   right: 0;
   padding: 8px;
-  background: #fff;
-  border-top: 1px solid #ccc;
+  background: var(--tg-bg-color);
+  border-top: 1px solid var(--tg-border-color);
   transition: all 0.3s;
   width: 100%;
   margin: 0;
@@ -173,17 +173,16 @@
   flex: 1;
   padding: 8px 12px;
   margin: 0 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--tg-border-color);
   border-radius: 20px;
   font-size: 14px;
-  background: #f9f9f9;
+  background: var(--tg-secondary-bg-color);
   line-height: 1.4;
   transition: width 0.3s;
- max-height: 20vh;
+  max-height: 20vh;
   overflow-y: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
-
 }
 
 .message-input-container.focused textarea {
@@ -233,8 +232,8 @@
   left: 0;
   display: flex;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--tg-secondary-bg-color);
+  border: 1px solid var(--tg-border-color);
   padding: 4px;
   border-radius: 4px;
   z-index: 10;
@@ -260,9 +259,9 @@
 
 .reply-preview {
   font-size: 16px;
-  background: #f0f0f0;
+  background: var(--tg-secondary-bg-color);
   padding: 4px;
-  border-left: 4px solid #ccc;
+  border-left: 4px solid var(--tg-border-color);
   margin-bottom: 4px;
   display: flex;
   justify-content: space-between;
@@ -285,7 +284,7 @@
   position: sticky;
   top: 0;
   background: linear-gradient(135deg, #0088cc, #00bfff);
-  color: #fff;
+  color: var(--tg-button-text-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 2;
   flex-wrap: wrap;
@@ -316,12 +315,12 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--tg-button-text-color);
 }
 
 .header-name {
   font-weight: bold;
-  color: #fff;
+  color: var(--tg-button-text-color);
   overflow-wrap: anywhere;
 }
 
@@ -329,17 +328,16 @@
   text-align: center;
   margin: 8px 0;
   font-size: 14px;
-  color: #333;
-  background: #f5f5f5;
-  border: 1px solid #ccc;
+  color: var(--tg-text-color);
+  background: var(--tg-secondary-bg-color);
+  border: 1px solid var(--tg-border-color);
   padding: 8px;
   border-radius: 4px;
-
 }
 
 .generate-btn {
-  background: linear-gradient(90deg, #007fff, #00c6ff);
-  color: #fff;
+  background: linear-gradient(90deg, var(--tg-button-color), var(--tg-button-color));
+  color: var(--tg-button-text-color);
   padding: 12px 24px;
   border-radius: 16px;
   font-weight: 500;
@@ -376,7 +374,7 @@
   align-items: center;
   padding: 8px;
   background: linear-gradient(135deg, #0088cc, #00bfff);
-  color: #fff;
+  color: var(--tg-button-text-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   position: sticky;
   top: 0;
@@ -386,7 +384,7 @@
 .settings-icon {
   font-size: 24px;
   cursor: pointer;
-  color: #fff;
+  color: var(--tg-button-text-color);
 }
 
 .tabs {
@@ -398,16 +396,17 @@
 .tabs button {
   flex: 1;
   padding: 8px 0;
-  background: #f5f5f5;
+  background: var(--tg-secondary-bg-color);
   border: none;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  color: var(--tg-text-color);
 }
 
 .tabs button.active {
   font-weight: bold;
-  border-bottom-color: #000;
-  background: #fff;
+  border-bottom-color: var(--tg-text-color);
+  background: var(--tg-bg-color);
 }
 
 
