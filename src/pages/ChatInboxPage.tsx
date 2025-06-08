@@ -105,7 +105,23 @@ const ChatInboxPage: React.FC = () => {
       });
   }, []);
 
-  const executedChats = groups.map((g) => ({
+  const executedGroups = groups.filter((g) =>
+    g.conversations?.some((c: any) =>
+      c.messages?.some((m: any) => m.status === 'executed')
+    )
+  );
+  const scheduledGroups = groups.filter((g) =>
+    g.conversations?.some((c: any) =>
+      c.messages?.some((m: any) => m.status === 'pending')
+    )
+  );
+  const draftGroups = groups.filter((g) =>
+    g.conversations?.some((c: any) =>
+      c.messages?.some((m: any) => !m.status || m.status === 'draft')
+    )
+  );
+
+  const mapChat = (g: any) => ({
     id: g.groupId,
     avatar: '',
     alt: g.groupId,
@@ -115,10 +131,11 @@ const ChatInboxPage: React.FC = () => {
       '',
     date: new Date(),
     unread: 0,
-  }));
+  });
 
-  const scheduledChats = executedChats;
-  const draftChats: typeof executedChats = [];
+  const executedChats = executedGroups.map(mapChat);
+  const scheduledChats = scheduledGroups.map(mapChat);
+  const draftChats = draftGroups.map(mapChat);
 
   const [tabIndex, setTabIndex] = useState(0);
   const [viewportHeight, setViewportHeight] = useState<number>(
