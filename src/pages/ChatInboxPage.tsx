@@ -44,8 +44,13 @@ function TabPanel(props: TabPanelProps) {
       id={`chat-tabpanel-${index}`}
       aria-labelledby={`chat-tab-${index}`}
       {...other}
+      className="tab-panel"
     >
-      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
+      {value === index && (
+        <Box sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {children}
+        </Box>
+      )}
     </div>
   );
 }
@@ -229,17 +234,33 @@ const ChatInboxPage: React.FC = () => {
     )
   );
 
-  const mapChat = (g: any) => ({
-    id: g.groupId,
-    avatar: '',
-    alt: g.groupId,
-    title: g.groupId,
-    subtitle:
-      g.conversations?.[g.conversations.length - 1]?.messages?.slice(-1)[0]?.text ||
-      '',
-    date: new Date(),
-    unread: 0,
-  });
+  const mapChat = (g: any) => {
+    const conversations = g.conversations || [];
+    const lastConv = conversations[conversations.length - 1] || {};
+    const lastMsg = lastConv.messages?.slice(-1)[0] || {};
+
+    const id = g.groupId ?? g.id ?? '';
+    let candidate = g.title || g.name || g.username || '';
+    candidate = candidate.trim();
+    if (candidate.startsWith('@')) candidate = candidate.slice(1);
+    if (!candidate || /^\d+$/.test(candidate)) {
+      candidate = `Group ${id}`;
+    }
+    const name = candidate;
+
+    return {
+      id,
+      avatar: g.photo || undefined,
+      alt: name,
+      title: name,
+      subtitle: lastMsg.text || '',
+      date: lastMsg.createdAt ? new Date(lastMsg.createdAt) : undefined,
+      dateString: lastMsg.createdAt
+        ? new Date(lastMsg.createdAt).toLocaleString()
+        : undefined,
+      unread: 0,
+    };
+  };
 
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
@@ -376,6 +397,8 @@ const ChatInboxPage: React.FC = () => {
           value={tabIndex}
           onChange={(_, newValue) => setTabIndex(newValue)}
           aria-label="chat tabs"
+          className="chat-tabs"
+          variant="fullWidth"
         >
           <Tab label="Executed" {...a11yProps(0)} />
           <Tab label="Scheduled" {...a11yProps(1)} />
@@ -384,40 +407,60 @@ const ChatInboxPage: React.FC = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabIndex} index={0}>
-        <ChatList
-          className="chat-list"
-          dataSource={executedChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {executedChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={executedChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No executed messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
-        <ChatList
-          className="chat-list"
-          dataSource={scheduledChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {scheduledChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={scheduledChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No scheduled messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
-        <ChatList
-          className="chat-list"
-          dataSource={draftChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {draftChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={draftChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">No drafts yet. Tap + to create one.</p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={3}>
-        <ChatList
-          className="chat-list"
-          dataSource={groupChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {groupChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={groupChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">No groups found. Tap + to add one.</p>
+        )}
       </TabPanel>
 
       <SpeedDial
@@ -427,6 +470,7 @@ const ChatInboxPage: React.FC = () => {
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
         sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        className="fab"
       >
         <SpeedDialAction
           icon={<GroupAddIcon />}
