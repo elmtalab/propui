@@ -384,40 +384,60 @@ const ChatInboxPage: React.FC = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabIndex} index={0}>
-        <ChatList
-          className="chat-list"
-          dataSource={executedChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {executedChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={executedChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No executed messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
-        <ChatList
-          className="chat-list"
-          dataSource={scheduledChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {scheduledChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={scheduledChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">
+            No scheduled messages yet. Tap + to create one.
+          </p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
-        <ChatList
-          className="chat-list"
-          dataSource={draftChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {draftChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={draftChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">No drafts yet. Tap + to create one.</p>
+        )}
       </TabPanel>
       <TabPanel value={tabIndex} index={3}>
-        <ChatList
-          className="chat-list"
-          dataSource={groupChats}
-          onClick={(item: any) => {
-            navigate(`/chat/${(item as any).id}`);
-          }}
-        />
+        {groupChats.length ? (
+          <ChatList
+            className="chat-list"
+            dataSource={groupChats}
+            onClick={(item: any) => {
+              navigate(`/chat/${(item as any).id}`);
+            }}
+          />
+        ) : (
+          <p className="empty-message">No groups found. Tap + to add one.</p>
+        )}
       </TabPanel>
 
       <SpeedDial
@@ -427,6 +447,7 @@ const ChatInboxPage: React.FC = () => {
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
         sx={{ position: 'absolute', bottom: 16, right: 16 }}
+        className="fab"
       >
         <SpeedDialAction
           icon={<GroupAddIcon />}

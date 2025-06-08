@@ -420,6 +420,47 @@
 
 }
 
+/* Chat list items */
+.chat-list .rce-citem {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--tg-border-color);
+  background: var(--tg-secondary-bg-color);
+}
+
+.chat-list .rce-citem-avatar img {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+}
+
+.chat-list .rce-citem-body--bottom-title,
+.chat-list .rce-citem-body--top-time,
+.chat-list .rce-citem-body--top-title {
+  color: var(--tg-text-color);
+}
+
+.chat-list .rce-citem-body--top-title {
+  white-space: normal;
+}
+
+.fab .MuiFab-root {
+  background-color: #03a9f4;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+}
+
+.fab .MuiFab-root:hover {
+  transform: scale(1.1);
+}
+
+.empty-message {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
+}
+
 
 
 @keyframes App-logo-spin {
