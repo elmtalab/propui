@@ -125,6 +125,8 @@ const mergeGroups = (remote: any[] = [], local: any[] = []) => {
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<any[]>([]);
+  const [tabIndex, setTabIndex] = useState(0);
+  const [userGroups, setUserGroups] = useState<any[]>([]);
 
   useEffect(() => {
     let tgId: number | null = null;
@@ -178,6 +180,32 @@ const ChatInboxPage: React.FC = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (tabIndex !== 3 || userGroups.length) return;
+    let tgId: number | null = null;
+    const tgStr = localStorage.getItem('tg_init_data');
+    if (tgStr) {
+      try {
+        tgId = JSON.parse(tgStr).user?.id ?? null;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ?? null;
+    }
+    if (!tgId) return;
+    fetch(
+      `https://prop-backend-worker.elmtalabx.workers.dev/api/groups?telegramId=${tgId}`
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        setUserGroups(data.groups || []);
+      })
+      .catch(() => setUserGroups([]));
+  }, [tabIndex, userGroups.length]);
+
   const executedGroups = groups.filter((g) =>
     g.conversations?.some(
       (c: any) =>
@@ -216,10 +244,20 @@ const ChatInboxPage: React.FC = () => {
   const executedChats = executedGroups.map(mapChat);
   const scheduledChats = scheduledGroups.map(mapChat);
   const draftChats = draftGroups.map(mapChat);
-  // Chats for the "Group List" tab
-  const groupChats = groups.map(mapChat);
+ const groupChats = groups.map(mapChat);
 
-  const [tabIndex, setTabIndex] = useState(0);
+
+
+  const mapUserGroup = (g: any) => ({
+    id: g.group.id,
+    avatar: '',
+    alt: g.group.title,
+    title: g.group.title,
+    subtitle: g.group.username ? `@${g.group.username}` : '',
+    date: new Date(),
+    unread: g.group.online_count ?? 0,
+  });
+  const groupListChats = userGroups.map(mapUserGroup);
   const [viewportHeight, setViewportHeight] = useState<number>(
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
@@ -338,7 +376,8 @@ const ChatInboxPage: React.FC = () => {
       <TabPanel value={tabIndex} index={3}>
         <ChatList
           className="chat-list"
-          dataSource={groupChats}
+        dataSource={groupChats}
+
           onClick={(item: any) => {
             navigate(`/chat/${(item as any).id}`);
           }}

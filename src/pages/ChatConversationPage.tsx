@@ -248,7 +248,8 @@ const ChatConversationPage: React.FC = () => {
       const ledgerKey = `draft-json-${id}`;
       localStorage.setItem(ledgerKey, JSON.stringify(generateJSON()));
     }
-  }, [conversations, id, generateJSON]);
+ }, [conversations, id, generateJSON]);
+
 
 
 
