@@ -497,23 +497,22 @@ const handleInputChange = (
       >
         <span style={{ fontSize: 14 }}>Executed at</span>
         <DateTimePicker onChange={(d) => d && updateStartDateTime(d)} value={startDateTime} />
+        <Button
+          className="generate-btn"
+          onClick={handleGenerateAI}
+          disabled={generating}
+          style={{ width: 'auto' }}
+        >
+          {generating ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            <>
+              <AutoAwesomeIcon style={{ marginRight: 4 }} />
+              Schedule
+            </>
+          )}
+        </Button>
       </div>
-      <Button
-        className="generate-btn"
-        onClick={handleGenerateAI}
-        disabled={generating}
-        fullWidth
-        style={{ marginBottom: 8 }}
-      >
-        {generating ? (
-          <CircularProgress size={20} color="inherit" />
-        ) : (
-          <>
-            <AutoAwesomeIcon style={{ marginRight: 4 }} />
-            Generate a conversation with AI
-          </>
-        )}
-      </Button>
       <div
         className={`chat-messages ${
           transitionDir ? `animate-${transitionDir}` : ''
