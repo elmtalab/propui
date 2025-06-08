@@ -646,9 +646,6 @@ const handleInputChange = (
         />
 
       </div>
-      <div className="instruction-text">
-        You are creating messages. The AI will execute these messages.
-      </div>
       <div
         className="start-time-inputs"
         style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
