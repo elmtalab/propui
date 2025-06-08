@@ -41,6 +41,7 @@ const HomePage: React.FC = () => {
         } catch {
           // ignore read errors
         }
+
       }
     }
     if (data) {
