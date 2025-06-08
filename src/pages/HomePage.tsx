@@ -43,6 +43,7 @@ const HomePage: React.FC = () => {
             </p>
             <p>User ID: {initData.user.id}</p>
           </>
+
         )}
         {initData && (
           <pre

@@ -15,4 +15,5 @@ test('shows user id when telegram data available', () => {
   render(<App />);
   expect(screen.getByText(/user id: 42/i)).toBeInTheDocument();
   delete (window as any).Telegram;
+
 });
