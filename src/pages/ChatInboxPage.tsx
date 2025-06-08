@@ -80,6 +80,7 @@ const ChatInboxPage: React.FC = () => {
       const tg = (window as any).Telegram?.WebApp;
       tgId = tg?.initDataUnsafe?.user?.id ?? null;
     }
+
     if (!tgId) return;
     fetch(
       `https://prop-backend-worker.elmtalabx.workers.dev/api/user-conversations?telegramId=${tgId}`
