@@ -248,15 +248,6 @@ const ChatInboxPage: React.FC = () => {
 
 
 
-  const mapUserGroup = (g: any) => ({
-    id: g.group.id,
-    avatar: '',
-    alt: g.group.title,
-    title: g.group.title,
-    subtitle: g.group.username ? `@${g.group.username}` : '',
-    date: new Date(),
-    unread: g.group.online_count ?? 0,
-  });
   const [viewportHeight, setViewportHeight] = useState<number>(
     typeof window !== 'undefined' ? window.innerHeight : 0
   );
