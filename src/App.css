@@ -414,15 +414,34 @@
   background: var(--tg-bg-color);
 }
 
+.chat-tabs .MuiTab-root {
+  text-transform: none;
+  font-weight: 500;
+  color: var(--tg-text-color);
+}
+
+.chat-tabs .MuiTab-root.Mui-selected {
+  font-weight: bold;
+  color: var(--tg-button-color);
+}
+
+.chat-tabs .MuiTabs-indicator {
+  background-color: var(--tg-button-color);
+}
+
 .chat-list {
   background: var(--tg-secondary-bg-color);
   color: var(--tg-text-color);
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 72px;
 
 }
 
 /* Chat list items */
 .chat-list .rce-citem {
-  padding: 12px 16px;
+  padding: 8px 12px;
+
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--tg-border-color);
@@ -435,14 +454,25 @@
   margin-right: 12px;
 }
 
-.chat-list .rce-citem-body--bottom-title,
-.chat-list .rce-citem-body--top-time,
 .chat-list .rce-citem-body--top-title {
   color: var(--tg-text-color);
+  font-weight: bold;
+  white-space: normal;
 }
 
-.chat-list .rce-citem-body--top-title {
-  white-space: normal;
+.chat-list .rce-citem-body--bottom-title {
+  color: #aaa;
+}
+
+.chat-list .rce-citem-body--top-time {
+  color: #aaa;
+}
+
+.tab-panel {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+
 }
 
 .fab .MuiFab-root {
