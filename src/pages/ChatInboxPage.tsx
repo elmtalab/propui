@@ -496,6 +496,7 @@ const ChatInboxPage: React.FC = () => {
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
         sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 1500 }}
+
         className="fab"
         onPointerDown={(e) => {
           if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
