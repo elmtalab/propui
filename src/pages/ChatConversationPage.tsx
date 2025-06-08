@@ -340,6 +340,27 @@ const handleSend = () => {
     }).finally(() => setGenerating(false));
   };
 
+  const handleGenerateBotMessages = () => {
+    updateMessages((prev) => {
+      let nextId = prev.length ? prev[prev.length - 1].id : 0;
+      const others = avatars.filter((a) => a.id !== selectedAvatar.id);
+      const count = others.length;
+      const generated: Message[] = [];
+      for (let i = 0; i < 10; i++) {
+        const from = others[i % count].id;
+        generated.push({
+          id: ++nextId,
+          from,
+          text: `Auto message ${i + 1}`,
+          delay: 0,
+          status: 'draft',
+        });
+      }
+      return [...prev, ...generated];
+    });
+    setTimeout(scrollToBottomIfNeeded, 0);
+  };
+
   const computeTimestamp = (index: number) => {
     let total = 0;
     for (let i = 1; i <= index; i++) {
@@ -877,9 +898,9 @@ const handleInputChange = (
 
         <IconButton
           onMouseDown={(e) => e.preventDefault()}
-          onClick={handleSchedule}
+          onClick={handleGenerateBotMessages}
           color="primary"
-          aria-label="generate-ai"
+          aria-label="generate-messages"
         >
           <SmartToyIcon />
         </IconButton>
