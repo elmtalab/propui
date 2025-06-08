@@ -410,7 +410,8 @@ const ChatInboxPage: React.FC = () => {
 
 
   return (
-    <div className="chat-container" style={{ height: viewportHeight }}>
+    <>
+      <div className="chat-container" style={{ height: viewportHeight }}>
       <div className="inbox-header">
         <h2>Chats</h2>
         <IconButton size="large" className="settings-icon">
@@ -489,61 +490,7 @@ const ChatInboxPage: React.FC = () => {
 
       </TabPanel>
 
-      <SpeedDial
-        ariaLabel="chat actions"
-        icon={<SpeedDialIcon />}
-        open={speedDialOpen}
-        onOpen={() => setSpeedDialOpen(true)}
-        onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 9999 }}
 
-        className="fab"
-        onPointerDown={(e) => {
-          if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
-            setDraggingDial(true);
-          }
-        }}
-      >
-        <SpeedDialAction
-          icon={<GroupAddIcon />}
-          tooltipTitle="Add Group"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            setGroupDialogOpen(true);
-          }}
-        />
-        <SpeedDialAction
-          icon={<SettingsSuggestIcon />}
-          tooltipTitle="System Prompt"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            setPromptDialogOpen(true);
-          }}
-        />
-        <SpeedDialAction
-          icon={<SmartToyIcon />}
-          tooltipTitle="Auto Chat"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            if (!systemPrompt.displayName && !systemPrompt.occupation) {
-              setPromptDialogOpen(true);
-            } else {
-              alert(
-                `Generating conversations for ${selectedGroups.join(', ') ||
-                  'selected groups'}...`
-              );
-            }
-          }}
-        />
-        <SpeedDialAction
-          icon={<TimerIcon />}
-          tooltipTitle="Schedule"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            navigate('/chat');
-          }}
-        />
-      </SpeedDial>
 
       <Dialog open={groupDialogOpen} onClose={() => setGroupDialogOpen(false)} fullWidth>
         <DialogTitle>Select Groups</DialogTitle>
@@ -675,6 +622,58 @@ const ChatInboxPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </div>
+      <SpeedDial
+        ariaLabel="chat actions"
+        icon={<SpeedDialIcon />}
+        open={speedDialOpen}
+        onOpen={() => setSpeedDialOpen(true)}
+        onClose={() => setSpeedDialOpen(false)}
+        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 1500 }}
+        className="fab"
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
+            setDraggingDial(true);
+          }
+        }}
+      >
+        <SpeedDialAction
+          icon={<GroupAddIcon />}
+          tooltipTitle="Add Group"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            setGroupDialogOpen(true);
+          }}
+        />
+        <SpeedDialAction
+          icon={<SettingsSuggestIcon />}
+          tooltipTitle="System Prompt"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            setPromptDialogOpen(true);
+          }}
+        />
+        <SpeedDialAction
+          icon={<SmartToyIcon />}
+          tooltipTitle="Auto Chat"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            if (!systemPrompt.displayName && !systemPrompt.occupation) {
+              setPromptDialogOpen(true);
+            } else {
+              alert(`Generating conversations for ${selectedGroups.join(', ') || 'selected groups'}...`);
+            }
+          }}
+        />
+        <SpeedDialAction
+          icon={<TimerIcon />}
+          tooltipTitle="Schedule"
+          onClick={() => {
+            setSpeedDialOpen(false);
+            navigate('/chat');
+          }}
+        />
+      </SpeedDial>
+    </>
   );
 };
 
