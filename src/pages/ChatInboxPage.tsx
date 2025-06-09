@@ -389,6 +389,7 @@ const ChatInboxPage: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       setViewportHeight(window.innerHeight);
+      setSpeedDialPos((pos) => clampDialPos(pos));
     };
     const viewport = (window as any).visualViewport;
     if (viewport) {
