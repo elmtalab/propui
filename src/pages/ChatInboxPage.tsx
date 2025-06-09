@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useNavigate } from 'react-router-dom';
@@ -284,6 +284,16 @@ const ChatInboxPage: React.FC = () => {
     x: typeof window !== 'undefined' ? window.innerWidth - 80 : 300,
     y: typeof window !== 'undefined' ? window.innerHeight - 80 : 400,
   }));
+
+  const clampDialPos = (pos: { x: number; y: number }) => {
+    const vp: any = (window as any).visualViewport || window;
+    const width = vp.width ?? (vp as Window).innerWidth;
+    const height = vp.height ?? (vp as Window).innerHeight;
+    return {
+      x: Math.max(0, Math.min(pos.x, width - 80)),
+      y: Math.max(0, Math.min(pos.y, height - 80)),
+    };
+  };
   const [draggingDial, setDraggingDial] = useState(false);
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -395,10 +405,16 @@ const ChatInboxPage: React.FC = () => {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    setSpeedDialPos((pos) => clampDialPos(pos));
+  }, []);
+
   useEffect(() => {
     if (!draggingDial) return;
     const handleMove = (e: PointerEvent) => {
-      setSpeedDialPos((pos) => ({ x: pos.x + e.movementX, y: pos.y + e.movementY }));
+      setSpeedDialPos((pos) =>
+        clampDialPos({ x: pos.x + e.movementX, y: pos.y + e.movementY })
+      );
     };
     const stop = () => setDraggingDial(false);
     window.addEventListener('pointermove', handleMove);
