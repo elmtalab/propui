@@ -509,7 +509,13 @@ body.tg-dark .conversation-nav .MuiPaginationItem-root {
 .tab-panel {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  /* allow children like SpeedDial to extend outside */
+  overflow: visible;
+}
+
+/* keep SpeedDial from shrinking when used inside flex containers */
+.MuiSpeedDial-root {
+  flex: 0 0 auto;
 }
 
 .tab-panel[hidden] {
