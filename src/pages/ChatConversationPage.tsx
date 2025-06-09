@@ -539,6 +539,16 @@ const handleInputChange = (
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const inputs = document.querySelectorAll(
+      '.header-datetime input'
+    ) as NodeListOf<HTMLInputElement>;
+    inputs.forEach((input) => {
+      input.readOnly = true;
+      input.setAttribute('inputmode', 'none');
+    });
+  }, []);
+
 
   const headerName = (() => {
     const base = groupInfo?.title || groupInfo?.name || groupInfo?.username || '';

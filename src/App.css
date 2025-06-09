@@ -308,6 +308,10 @@
 .header-datetime .react-datetime-picker__inputGroup {
   color: #000;
 }
+body.tg-dark .header-datetime input,
+body.tg-dark .header-datetime .react-datetime-picker__inputGroup {
+  color: #fff;
+}
 
 .conversation-nav {
   display: flex;
@@ -561,4 +565,37 @@ body.tg-dark .conversation-nav .MuiPaginationItem-root {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Dark mode overrides for DateTimePicker and Calendar */
+body.tg-dark .react-datetime-picker__wrapper {
+  background: var(--tg-secondary-bg-color);
+  border: 1px solid var(--tg-border-color);
+  color-scheme: dark;
+  color: var(--tg-text-color);
+}
+
+body.tg-dark .react-calendar {
+  background: var(--tg-secondary-bg-color);
+  color: var(--tg-text-color);
+  border: 1px solid var(--tg-border-color);
+  color-scheme: dark;
+}
+
+body.tg-dark .react-calendar button {
+  color: var(--tg-text-color);
+}
+
+body.tg-dark .react-calendar__navigation button {
+  color: var(--tg-text-color);
+}
+
+body.tg-dark .react-calendar__tile--active {
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
+}
+
+body.tg-dark .react-calendar__tile--now {
+  background: var(--tg-button-color);
+  color: var(--tg-button-text-color);
 }
