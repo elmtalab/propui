@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+
 import { createPortal } from 'react-dom';
 
 import { useNavigate } from 'react-router-dom';
@@ -301,6 +302,7 @@ const ChatInboxPage: React.FC = () => {
     return {
       x: Math.max(0, Math.min(pos.x, width - dw)),
       y: Math.max(0, Math.min(pos.y, height - dh)),
+
     };
   };
   const [draggingDial, setDraggingDial] = useState(false);
@@ -402,6 +404,7 @@ const ChatInboxPage: React.FC = () => {
         const rect = speedDialRef.current.getBoundingClientRect();
         dialSizeRef.current = { width: rect.width, height: rect.height };
       }
+
       setSpeedDialPos((pos) => clampDialPos(pos));
     };
     const viewport = (window as any).visualViewport;
@@ -431,6 +434,7 @@ const ChatInboxPage: React.FC = () => {
       const { width: dw, height: dh } = dialSizeRef.current;
       return clampDialPos({ x: width - dw, y: height - dh });
     });
+
   }, []);
 
   useEffect(() => {
