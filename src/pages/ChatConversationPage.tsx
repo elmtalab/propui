@@ -11,9 +11,6 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CircularProgress from '@mui/material/CircularProgress';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 
 // SpeedDial features moved to ChatInboxPage
 import Dialog from '@mui/material/Dialog';
@@ -190,12 +187,6 @@ const ChatConversationPage: React.FC = () => {
   const [jsonOpen, setJsonOpen] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [speedDialOpen, setSpeedDialOpen] = useState(false);
-  const [speedDialPos, setSpeedDialPos] = useState(() => ({
-    x: typeof window !== 'undefined' ? window.innerWidth - 80 : 300,
-    y: typeof window !== 'undefined' ? window.innerHeight - 80 : 400,
-  }));
-  const [draggingDial, setDraggingDial] = useState(false);
 
   const generateJSON = useCallback(
     (convList: Conversation[] = conversations) => {
@@ -548,19 +539,6 @@ const handleInputChange = (
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    if (!draggingDial) return;
-    const handleMove = (e: PointerEvent) => {
-      setSpeedDialPos((pos) => ({ x: pos.x + e.movementX, y: pos.y + e.movementY }));
-    };
-    const stop = () => setDraggingDial(false);
-    window.addEventListener('pointermove', handleMove);
-    window.addEventListener('pointerup', stop);
-    return () => {
-      window.removeEventListener('pointermove', handleMove);
-      window.removeEventListener('pointerup', stop);
-    };
-  }, [draggingDial]);
 
   const headerName = (() => {
     const base = groupInfo?.title || groupInfo?.name || groupInfo?.username || '';
@@ -999,45 +977,6 @@ const handleInputChange = (
         </DialogActions>
       </Dialog>
 
-      <SpeedDial
-        ariaLabel="chat actions"
-        icon={<SpeedDialIcon />}
-        open={speedDialOpen}
-        onOpen={() => setSpeedDialOpen(true)}
-        onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 9999 }}
-        className="fab"
-        onPointerDown={(e) => {
-          if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
-            setDraggingDial(true);
-          }
-        }}
-      >
-        <SpeedDialAction
-          icon={<CodeIcon />}
-          tooltipTitle="Show JSON"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            setJsonOpen(true);
-          }}
-        />
-        <SpeedDialAction
-          icon={<SmartToyIcon />}
-          tooltipTitle="Auto Chat"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            handleGenerateBotMessages();
-          }}
-        />
-        <SpeedDialAction
-          icon={<TimerIcon />}
-          tooltipTitle="Schedule"
-          onClick={() => {
-            setSpeedDialOpen(false);
-            handleSchedule();
-          }}
-        />
-      </SpeedDial>
 
 
     </div>
