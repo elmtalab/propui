@@ -137,6 +137,10 @@
   font-size: 16px;
   color: var(--tg-text-color);
 }
+.delay-btn svg {
+  color: var(--tg-text-color);
+
+}
 
 
 .message-item.swipe {
