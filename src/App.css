@@ -299,12 +299,19 @@
   flex-shrink: 0;
   flex-basis: auto;
 }
+.header-datetime input,
+.header-datetime .react-datetime-picker__inputGroup {
+  color: #000;
+}
 
 .conversation-nav {
   display: flex;
   justify-content: center;
   gap: 4px;
   margin-bottom: 8px;
+}
+body.tg-dark .conversation-nav .MuiPaginationItem-root {
+  color: #fff;
 }
 
 
@@ -508,6 +515,12 @@
 .tab-panel[hidden] {
   display: none !important;
 
+}
+
+
+.fab {
+  position: fixed;
+  z-index: 1500;
 }
 
 .fab .MuiFab-root {
