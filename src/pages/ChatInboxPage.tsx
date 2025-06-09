@@ -18,6 +18,8 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import TimerIcon from '@mui/icons-material/Timer';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -320,6 +322,12 @@ const ChatInboxPage: React.FC = () => {
 
   const [traitInput, setTraitInput] = useState('');
 
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [addingUser, setAddingUser] = useState(false);
+
   const handleToggleGroup = (group: string) => {
     setSelectedGroups((prev) =>
       prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
@@ -348,6 +356,50 @@ const ChatInboxPage: React.FC = () => {
       ...prev,
       assistantTraits: prev.assistantTraits.filter((t) => t !== trait),
     }));
+  };
+
+  const handleSendPhone = () => {
+    const phone = phoneNumber.trim();
+    if (!phone) return;
+    setAddingUser(true);
+    fetch(
+      'https://prop-backend-worker.elmtalabx.workers.dev/api/telegram/send-code',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      }
+    )
+      .then(() => setCodeSent(true))
+      .catch(() => {
+        /* ignore */
+      })
+      .finally(() => setAddingUser(false));
+  };
+
+  const handleVerifyCode = () => {
+    const code = verificationCode.trim();
+    if (!code) return;
+    setAddingUser(true);
+    fetch(
+      'https://prop-backend-worker.elmtalabx.workers.dev/api/telegram/verify-code',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber.trim(), code }),
+      }
+    )
+      .then(() => {
+        setAddUserOpen(false);
+        setCodeSent(false);
+        setPhoneNumber('');
+        setVerificationCode('');
+        alert('User logged in');
+      })
+      .catch(() => {
+        /* ignore */
+      })
+      .finally(() => setAddingUser(false));
   };
 
   const handleSearchGroup = () => {
@@ -666,6 +718,39 @@ const ChatInboxPage: React.FC = () => {
           <Button onClick={() => setPromptDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={addUserOpen} onClose={() => setAddUserOpen(false)} fullWidth>
+        <DialogTitle>Add Telegram User</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {!codeSent ? (
+            <TextField
+              label="Phone Number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              fullWidth
+            />
+          ) : (
+            <TextField
+              label="2FA Code"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              fullWidth
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          {!codeSent ? (
+            <Button onClick={handleSendPhone} disabled={addingUser}>
+              {addingUser ? <CircularProgress size={20} /> : 'Send Code'}
+            </Button>
+          ) : (
+            <Button onClick={handleVerifyCode} disabled={addingUser}>
+              {addingUser ? <CircularProgress size={20} /> : 'Verify'}
+            </Button>
+          )}
+          <Button onClick={() => setAddUserOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
     {createPortal(
       <SpeedDial
@@ -690,6 +775,21 @@ const ChatInboxPage: React.FC = () => {
           onClick={() => {
             setSpeedDialOpen(false);
             setGroupDialogOpen(true);
+          }}
+        />
+        <SpeedDialAction
+          icon={<PersonAddIcon />}
+          tooltipTitle="Add User"
+          FabProps={{
+            sx: {
+              bgcolor: '#34aadf',
+              color: '#fff',
+              '&:hover': { bgcolor: '#289cc4' },
+            },
+          }}
+          onClick={() => {
+            setSpeedDialOpen(false);
+            setAddUserOpen(true);
           }}
         />
         <SpeedDialAction
