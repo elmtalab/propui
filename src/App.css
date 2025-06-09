@@ -516,6 +516,7 @@ body.tg-dark .conversation-nav .MuiPaginationItem-root {
 /* keep SpeedDial from shrinking when used inside flex containers */
 .MuiSpeedDial-root {
   flex: 0 0 auto;
+
 }
 
 .tab-panel[hidden] {
