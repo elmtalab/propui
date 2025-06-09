@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -622,13 +623,15 @@ const ChatInboxPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </div>
+    {createPortal(
       <SpeedDial
         ariaLabel="chat actions"
         icon={<SpeedDialIcon />}
         open={speedDialOpen}
         onOpen={() => setSpeedDialOpen(true)}
         onClose={() => setSpeedDialOpen(false)}
-        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 2000 }}
+        sx={{ position: 'fixed', top: speedDialPos.y, left: speedDialPos.x, zIndex: 3000 }}
+
         className="fab"
         onPointerDown={(e) => {
           if ((e.target as HTMLElement).closest('.MuiSpeedDial-fab')) {
@@ -672,7 +675,9 @@ const ChatInboxPage: React.FC = () => {
             navigate('/chat');
           }}
         />
-      </SpeedDial>
+      </SpeedDial>,
+      document.body
+    )}
     </>
   );
 };
