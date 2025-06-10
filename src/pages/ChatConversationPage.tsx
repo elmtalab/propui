@@ -122,6 +122,7 @@ const ChatConversationPage: React.FC = () => {
         }
         setAvatars(avs);
         if (avs.length) {
+
           setSelectedAvatar(avs[0]);
         }
       })
@@ -418,6 +419,7 @@ const handleSend = () => {
   const findAvatar = (id: string) =>
     avatars.find((a) => a.id === id) || { id: '', telegramId: '' };
 
+
   const handleSwipeReply = (msg: Message) => {
     setMenuId(null);
     setMenuPosition(null);
@@ -704,6 +706,7 @@ const handleInputChange = (
       >
         {messages.map((msg, idx) => {
           const av = findAvatar(msg.from);
+
           const me = msg.from === selectedAvatar?.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           return (
