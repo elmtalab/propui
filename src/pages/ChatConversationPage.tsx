@@ -121,7 +121,8 @@ const ChatConversationPage: React.FC = () => {
           }
         }
         setAvatars(avs);
-        if (avs.length && !selectedAvatar) {
+        if (avs.length) {
+
           setSelectedAvatar(avs[0]);
         }
       })
@@ -415,7 +416,9 @@ const handleSend = () => {
     setInputFocused(false);
   };
 
-  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || { id: '', telegramId: '' };
+  const findAvatar = (id: string) =>
+    avatars.find((a) => a.id === id) || { id: '', telegramId: '' };
+
 
   const handleSwipeReply = (msg: Message) => {
     setMenuId(null);
@@ -601,7 +604,7 @@ const handleInputChange = (
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
         <img
-          src={getAvatar(id ?? '').avatar}
+          src={findAvatar(id ?? '').avatar}
           className="header-avatar"
           alt={id}
         />
@@ -702,7 +705,8 @@ const handleInputChange = (
         ref={messagesRef}
       >
         {messages.map((msg, idx) => {
-          const av = getAvatar(msg.from);
+          const av = findAvatar(msg.from);
+
           const me = msg.from === selectedAvatar?.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           return (
