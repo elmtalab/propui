@@ -29,9 +29,10 @@ export async function listAvatars(telegramId: string): Promise<string[]> {
   return data.avatarIds as string[];
 }
 
-export async function getAvatar(avatarId: string): Promise<{ telegramId: string; sessionString: string }> {
+export async function getAvatar(avatarId: string): Promise<{ telegramId: string }> {
   const resp = await fetch(`${BASE_URL}/api/avatar?avatarId=${encodeURIComponent(avatarId)}`);
   if (!resp.ok) throw new Error('Failed to get avatar');
   const data = await resp.json();
-  return data as { telegramId: string; sessionString: string };
+  return { telegramId: data.telegramId as string };
+
 }
