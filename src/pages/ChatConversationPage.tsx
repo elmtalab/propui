@@ -33,23 +33,14 @@ import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 
 import { Link, useParams } from 'react-router-dom';
+import { listAvatars, getAvatar } from '../api';
 
 interface Avatar {
   id: string;
-  avatar: string;
-  color: string;
+  telegramId: string;
+  avatar?: string;
+  color?: string;
 }
-
-const avatars: Avatar[] = [
-  { id: 'kursat', avatar: 'https://avatars.githubusercontent.com/u/80540635?v=4', color: '#ffadad' },
-  { id: 'emre', avatar: 'https://avatars.githubusercontent.com/u/41473129?v=4', color: '#ffd6a5' },
-  { id: 'abdurrahim', avatar: 'https://avatars.githubusercontent.com/u/90318672?v=4', color: '#fdffb6' },
-  { id: 'esra', avatar: 'https://avatars.githubusercontent.com/u/53093667?s=100&v=4', color: '#caffbf' },
-  { id: 'bensu', avatar: 'https://avatars.githubusercontent.com/u/50342489?s=100&v=4', color: '#9bf6ff' },
-  { id: 'burhan', avatar: 'https://avatars.githubusercontent.com/u/80754124?s=100&v=4', color: '#a0c4ff' },
-  { id: 'abdurrahman', avatar: 'https://avatars.githubusercontent.com/u/15075759?s=100&v=4', color: '#bdb2ff' },
-  { id: 'ahmet', avatar: 'https://avatars.githubusercontent.com/u/57258793?s=100&v=4', color: '#ffc6ff' },
-];
 
 interface Message {
   id: number;
@@ -69,17 +60,6 @@ interface Conversation {
   messages: Message[];
 }
 
-const initialMessages: Record<string, Message[]> = {
-  kursat: [{ id: 1, uuid: uuidv4(), from: 'kursat', text: "Why don't we go to the mall this weekend ?", delay: 0, status: 'draft' }],
-  emre: [{ id: 1, uuid: uuidv4(), from: 'emre', text: 'Send me our photos.', delay: 0, status: 'draft' }],
-  abdurrahim: [{ id: 1, uuid: uuidv4(), from: 'abdurrahim', text: 'Hey ! Send me the animation video please.', delay: 0, status: 'draft' }],
-  esra: [{ id: 1, uuid: uuidv4(), from: 'esra', text: 'I need a random voice.', delay: 0, status: 'draft' }],
-  bensu: [{ id: 1, uuid: uuidv4(), from: 'bensu', text: 'Send your location.', delay: 0, status: 'draft' }],
-  burhan: [{ id: 1, uuid: uuidv4(), from: 'burhan', text: 'Recommend me some songs.', delay: 0, status: 'draft' }],
-  abdurrahman: [{ id: 1, uuid: uuidv4(), from: 'abdurrahman', text: 'Where is the presentation file ?', delay: 0, status: 'draft' }],
-  ahmet: [{ id: 1, uuid: uuidv4(), from: 'ahmet', text: "Let's join the daily meeting.", delay: 0, status: 'draft' }],
-};
-
 
 const ChatConversationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,7 +69,7 @@ const ChatConversationPage: React.FC = () => {
     {
       id: uuidv4(),
       startDateTime: initialStart,
-      messages: initialMessages[id ?? ''] || [],
+      messages: [],
     },
   ]);
   const [conversationIndex, setConversationIndex] = useState(0);
@@ -97,7 +77,8 @@ const ChatConversationPage: React.FC = () => {
 
 
   const [text, setText] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState<Avatar>(avatars[0]);
+  const [avatars, setAvatars] = useState<Avatar[]>([]);
+  const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
   const [showAvatars, setShowAvatars] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -112,6 +93,42 @@ const ChatConversationPage: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const [groupInfo, setGroupInfo] = useState<any>(null);
+
+  useEffect(() => {
+    let tgId: string | null = null;
+    const stored = localStorage.getItem('tg_init_data');
+    if (stored) {
+      try {
+        tgId = String(JSON.parse(stored).user?.id ?? '');
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : null;
+    }
+    if (!tgId) return;
+    listAvatars(tgId)
+      .then(async (ids) => {
+        const avs: Avatar[] = [];
+        for (const aid of ids) {
+          try {
+            const data = await getAvatar(aid);
+            avs.push({ id: aid, telegramId: data.telegramId });
+          } catch {
+            /* ignore */
+          }
+        }
+        setAvatars(avs);
+        if (avs.length) {
+          setSelectedAvatar(avs[0]);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('conversations');
@@ -132,7 +149,7 @@ const ChatConversationPage: React.FC = () => {
             return {
               id: idx + 1,
               uuid: m.message_id || m.uuid || uuidv4(),
-              from: m.sender_id || m.from || avatars[0].id,
+              from: m.sender_id || m.from || '',
               text: m.text || m.message_content || '',
               delay: 0,
               status: m.status || defaultStatus,
@@ -219,7 +236,7 @@ const ChatConversationPage: React.FC = () => {
         return {
           conversation_id: conv.id,
           start_time: conv.startDateTime.toISOString(),
-          initiated_by: conv.messages[0]?.from || selectedAvatar.id,
+          initiated_by: conv.messages[0]?.from || selectedAvatar?.id || '',
           topic: '',
           conversation_metadata: { active: true, tags: [] },
           messages: msgs,
@@ -357,6 +374,7 @@ const ChatConversationPage: React.FC = () => {
 
 const handleSend = () => {
   if (!text.trim()) return;
+  if (!selectedAvatar) return;
   updateMessages((prev) => {
     if (editingId !== null) {
       return prev.map((m) => (m.id === editingId ? { ...m, text } : m));
@@ -367,7 +385,7 @@ const handleSend = () => {
       {
         id: newId,
         uuid: uuidv4(),
-        from: selectedAvatar.id,
+        from: selectedAvatar?.id || '',
         text,
         delay: 0,
         status: 'draft',
@@ -397,7 +415,8 @@ const handleSend = () => {
     setInputFocused(false);
   };
 
-  const getAvatar = (id: string) => avatars.find((a) => a.id === id) || avatars[0];
+  const findAvatar = (id: string) =>
+    avatars.find((a) => a.id === id) || { id: '', telegramId: '' };
 
   const handleSwipeReply = (msg: Message) => {
     setMenuId(null);
@@ -464,11 +483,11 @@ const handleSend = () => {
   const handleGenerateBotMessages = () => {
     updateMessages((prev) => {
       let nextId = prev.length ? prev[prev.length - 1].id : 0;
-      const others = avatars.filter((a) => a.id !== selectedAvatar.id);
+      const others = avatars.filter((a) => a.id !== selectedAvatar?.id);
       const count = others.length;
       const generated: Message[] = [];
       for (let i = 0; i < 10; i++) {
-        const from = others[i % count].id;
+        const from = count ? others[i % count].id : selectedAvatar?.id || '';
         generated.push({
           id: ++nextId,
           uuid: uuidv4(),
@@ -583,7 +602,7 @@ const handleInputChange = (
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
         <img
-          src={getAvatar(id ?? '').avatar}
+          src={findAvatar(id ?? '').avatar}
           className="header-avatar"
           alt={id}
         />
@@ -684,8 +703,8 @@ const handleInputChange = (
         ref={messagesRef}
       >
         {messages.map((msg, idx) => {
-          const av = getAvatar(msg.from);
-          const me = msg.from === selectedAvatar.id;
+          const av = findAvatar(msg.from);
+          const me = msg.from === selectedAvatar?.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           return (
             <React.Fragment key={msg.id}>
@@ -904,7 +923,7 @@ const handleInputChange = (
       <div className={`message-input-container ${inputFocused ? 'focused' : ''}`}>
         <div style={{ position: 'relative' }}>
           <img
-            src={selectedAvatar.avatar}
+            src={selectedAvatar?.avatar || 'https://placehold.co/28x28'}
             className="selected-avatar"
             alt="selected avatar"
             onClick={() => setShowAvatars((s) => !s)}
@@ -914,8 +933,8 @@ const handleInputChange = (
               {avatars.map((a) => (
                 <img
                   key={a.id}
-                  src={a.avatar}
-                  alt={a.id}
+                  src={a.avatar || 'https://placehold.co/28x28'}
+                  alt={a.telegramId}
                   onClick={() => {
                     setSelectedAvatar(a);
                     setShowAvatars(false);
