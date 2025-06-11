@@ -52,6 +52,7 @@ const colorFromId = (id: string): string => {
   return `hsl(${hue}, 70%, 85%)`;
 };
 
+
 interface Message {
   id: number;
   uuid: string;
@@ -126,12 +127,14 @@ const ChatConversationPage: React.FC = () => {
           try {
             const data = await getAvatar(aid);
             avs.push({ id: aid, telegramId: data.telegramId, color: colorFromId(aid) });
+
           } catch {
             /* ignore */
           }
         }
         setAvatars(avs);
         if (avs.length) {
+
           setSelectedAvatar(avs[0]);
         }
       })
@@ -432,6 +435,7 @@ const handleSend = () => {
       color: colorFromId(id),
     };
 
+
   const handleSwipeReply = (msg: Message) => {
     setMenuId(null);
     setMenuPosition(null);
@@ -718,6 +722,7 @@ const handleInputChange = (
       >
         {messages.map((msg, idx) => {
           const av = findAvatar(msg.from);
+
           const me = msg.from === selectedAvatar?.id;
           const reply = msg.replyTo != null ? messages.find((m) => m.id === msg.replyTo) : null;
           return (

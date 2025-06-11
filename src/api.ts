@@ -34,4 +34,5 @@ export async function getAvatar(avatarId: string): Promise<{ telegramId: string 
   if (!resp.ok) throw new Error('Failed to get avatar');
   const data = await resp.json();
   return { telegramId: data.telegramId as string };
+
 }
