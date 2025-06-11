@@ -996,21 +996,20 @@ const handleInputChange = (
           <SmartToyIcon />
         </IconButton>
 
-        <Button
-          className="generate-btn schedule-btn"
+        <IconButton
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleSchedule}
+          color="primary"
+          aria-label="schedule"
           disabled={generating}
           style={{ marginLeft: 4 }}
         >
           {generating ? (
             <CircularProgress size={20} color="inherit" />
           ) : (
-            <>
-              <AutoAwesomeIcon style={{ marginRight: 4 }} />
-              Schedule
-            </>
+            <AutoAwesomeIcon />
           )}
-        </Button>
+        </IconButton>
 
         <IconButton
           className="send-button"

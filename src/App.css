@@ -382,13 +382,6 @@ body.tg-dark .conversation-nav .MuiPaginationItem-root {
   box-shadow: 0 0 6px rgba(0, 198, 255, 0.6);
 }
 
-.schedule-btn {
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  width: auto;
-}
-
 .inbox-header {
   display: flex;
   justify-content: space-between;
