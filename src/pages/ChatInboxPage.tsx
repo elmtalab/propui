@@ -31,7 +31,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { startLogin, verifyLogin, listAvatars } from '../api';
+import {
+  startLogin,
+  verifyLogin,
+  listAvatars,
+  getGroupCoverUrl,
+} from '../api';
 import { toast } from 'react-hot-toast';
 import LoadingOverlay from '../LoadingOverlay';
 
@@ -218,7 +223,12 @@ const ChatInboxPage: React.FC = () => {
         const groups = Array.isArray(data.groups)
           ? data.groups.map((g: any) => g.group || g)
           : [];
-        setUserGroups(groups);
+        const clean = groups.filter((g: any) => {
+          let name = (g.title || g.name || g.username || '').trim();
+          if (name.startsWith('@')) name = name.slice(1);
+          return name && !/^\d+$/.test(name);
+        });
+        setUserGroups(clean);
       })
       .catch(() => setUserGroups([]));
   }, [tabIndex, userGroups.length]);
@@ -256,13 +266,13 @@ const ChatInboxPage: React.FC = () => {
     candidate = candidate.trim();
     if (candidate.startsWith('@')) candidate = candidate.slice(1);
     if (!candidate || /^\d+$/.test(candidate)) {
-      candidate = `Group ${id}`;
+      return null;
     }
     const name = candidate;
 
     return {
       id,
-      avatar: g.photo || undefined,
+      avatar: getGroupCoverUrl(String(id)),
 
       alt: name,
       title: name,
@@ -276,10 +286,10 @@ const ChatInboxPage: React.FC = () => {
     };
   };
 
-  const executedChats = executedGroups.map(mapChat);
-  const scheduledChats = scheduledGroups.map(mapChat);
-  const draftChats = draftGroups.map(mapChat);
-  const groupChats = (userGroups.length ? userGroups : groups).map(mapChat);
+  const executedChats = executedGroups.map(mapChat).filter(Boolean);
+  const scheduledChats = scheduledGroups.map(mapChat).filter(Boolean);
+  const draftChats = draftGroups.map(mapChat).filter(Boolean);
+  const groupChats = (userGroups.length ? userGroups : groups).map(mapChat).filter(Boolean);
 
 
 
@@ -486,6 +496,11 @@ const ChatInboxPage: React.FC = () => {
       .then((data) => {
         const g = data?.group?.group;
         if (g && g.id) {
+          let name = (g.title || g.name || g.username || '').trim();
+          if (name.startsWith('@')) name = name.slice(1);
+          if (!name || /^\d+$/.test(name)) {
+            return;
+          }
           setGroups((prev) => {
             if (prev.some((pg) => pg.groupId === g.id)) return prev;
             return [...prev, { groupId: g.id, conversations: [] }];
