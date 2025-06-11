@@ -31,6 +31,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { startLogin, verifyLogin, listAvatars } from '../api';
+import { toast } from 'react-hot-toast';
 
 
 interface TabPanelProps {
@@ -323,10 +325,12 @@ const ChatInboxPage: React.FC = () => {
   const [traitInput, setTraitInput] = useState('');
 
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [countryCode, setCountryCode] = useState('+1');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [addingUser, setAddingUser] = useState(false);
+  const [loginId, setLoginId] = useState('');
 
   const handleToggleGroup = (group: string) => {
     setSelectedGroups((prev) =>
@@ -358,48 +362,81 @@ const ChatInboxPage: React.FC = () => {
     }));
   };
 
-  const handleSendPhone = () => {
-    const phone = phoneNumber.trim();
+  const handleSendPhone = async () => {
+    const phone = `${countryCode}${phoneNumber.trim()}`;
     if (!phone) return;
-    setAddingUser(true);
-    fetch(
-      'https://prop-backend-worker.elmtalabx.workers.dev/api/telegram/send-code',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
-      }
-    )
-      .then(() => setCodeSent(true))
-      .catch(() => {
+    let tgId: string | null = null;
+    const tgStr = localStorage.getItem('tg_init_data');
+    if (tgStr) {
+      try {
+        tgId = String(JSON.parse(tgStr).user?.id ?? '');
+      } catch {
         /* ignore */
-      })
-      .finally(() => setAddingUser(false));
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : null;
+    }
+    if (!tgId) return;
+    setAddingUser(true);
+    try {
+      const id = await toast.promise(
+        startLogin(tgId, phone),
+        {
+          loading: 'Sending code...',
+          success: 'Code sent',
+          error: 'Failed to send code',
+        }
+      );
+      setLoginId(id);
+      setCodeSent(true);
+    } finally {
+      setAddingUser(false);
+    }
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     const code = verificationCode.trim();
-    if (!code) return;
-    setAddingUser(true);
-    fetch(
-      'https://prop-backend-worker.elmtalabx.workers.dev/api/telegram/verify-code',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber.trim(), code }),
-      }
-    )
-      .then(() => {
-        setAddUserOpen(false);
-        setCodeSent(false);
-        setPhoneNumber('');
-        setVerificationCode('');
-        alert('User logged in');
-      })
-      .catch(() => {
+    if (!code || !loginId) return;
+    let tgId: string | null = null;
+    const tgStr = localStorage.getItem('tg_init_data');
+    if (tgStr) {
+      try {
+        tgId = String(JSON.parse(tgStr).user?.id ?? '');
+      } catch {
         /* ignore */
-      })
-      .finally(() => setAddingUser(false));
+      }
+    }
+    if (!tgId) {
+      const tg = (window as any).Telegram?.WebApp;
+      tgId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : null;
+    }
+    if (!tgId) return;
+    setAddingUser(true);
+    try {
+      await toast.promise(
+        verifyLogin(loginId, code),
+        {
+          loading: 'Verifying...',
+          success: 'User logged in',
+          error: 'Verification failed',
+        }
+      );
+      const list = await listAvatars(tgId);
+      try {
+        localStorage.setItem('avatarIds', JSON.stringify(list));
+      } catch {
+        /* ignore */
+      }
+      setAddUserOpen(false);
+      setCodeSent(false);
+      setPhoneNumber('');
+      setVerificationCode('');
+      setLoginId('');
+    } finally {
+      setAddingUser(false);
+    }
   };
 
   const handleSearchGroup = () => {
@@ -723,12 +760,20 @@ const ChatInboxPage: React.FC = () => {
         <DialogTitle>Add Telegram User</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {!codeSent ? (
-            <TextField
-              label="Phone Number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              fullWidth
-            />
+            <>
+              <TextField
+                label="Country Code"
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                fullWidth
+              />
+            </>
           ) : (
             <TextField
               label="2FA Code"
