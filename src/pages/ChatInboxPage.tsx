@@ -330,6 +330,7 @@ const ChatInboxPage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
+
   const [telegramPassword, setTelegramPassword] = useState('');
   const [addingUser, setAddingUser] = useState(false);
   const [loginId, setLoginId] = useState('');
@@ -420,12 +421,14 @@ const ChatInboxPage: React.FC = () => {
     try {
       await toast.promise(
         verifyLogin(loginId, code, telegramPassword.trim() || undefined),
+
         {
           loading: 'Verifying...',
           success: 'User logged in',
           error: (err) => err.message || 'Verification failed',
         },
       );
+
 
       setTelegramPassword('');
 
@@ -438,7 +441,7 @@ const ChatInboxPage: React.FC = () => {
       handleCloseAddUser();
 
     } catch (err: any) {
-      // error messages handled via toast
+
     } finally {
       setAddingUser(false);
     }
@@ -447,6 +450,7 @@ const ChatInboxPage: React.FC = () => {
   const handleCloseAddUser = () => {
     setAddUserOpen(false);
     setCodeSent(false);
+
     setTelegramPassword('');
     setPhoneNumber('');
     setVerificationCode('');
@@ -803,6 +807,7 @@ const ChatInboxPage: React.FC = () => {
                 onChange={(e) => setTelegramPassword(e.target.value)}
                 fullWidth
               />
+
             </>
           )}
         </DialogContent>
