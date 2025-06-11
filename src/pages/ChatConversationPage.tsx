@@ -42,6 +42,17 @@ interface Avatar {
   color?: string;
 }
 
+const colorFromId = (id: string): string => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    hash |= 0; // convert to 32bit integer
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 70%, 85%)`;
+};
+
+
 interface Message {
   id: number;
   uuid: string;
@@ -115,7 +126,8 @@ const ChatConversationPage: React.FC = () => {
         for (const aid of ids) {
           try {
             const data = await getAvatar(aid);
-            avs.push({ id: aid, telegramId: data.telegramId });
+            avs.push({ id: aid, telegramId: data.telegramId, color: colorFromId(aid) });
+
           } catch {
             /* ignore */
           }
@@ -416,8 +428,12 @@ const handleSend = () => {
     setInputFocused(false);
   };
 
-  const findAvatar = (id: string) =>
-    avatars.find((a) => a.id === id) || { id: '', telegramId: '' };
+  const findAvatar = (id: string): Avatar =>
+    avatars.find((a) => a.id === id) || {
+      id,
+      telegramId: '',
+      color: colorFromId(id),
+    };
 
 
   const handleSwipeReply = (msg: Message) => {

@@ -32,6 +32,8 @@ import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { startLogin, verifyLogin, listAvatars } from '../api';
+import { toast } from 'react-hot-toast';
+
 
 
 interface TabPanelProps {
@@ -380,11 +382,17 @@ const ChatInboxPage: React.FC = () => {
     if (!tgId) return;
     setAddingUser(true);
     try {
-      const id = await startLogin(tgId, phone);
+      const id = await toast.promise(
+        startLogin(tgId, phone),
+        {
+          loading: 'Sending code...',
+          success: 'Code sent',
+          error: 'Failed to send code',
+        }
+      );
       setLoginId(id);
       setCodeSent(true);
-    } catch {
-      /* ignore */
+
     } finally {
       setAddingUser(false);
     }
@@ -409,7 +417,15 @@ const ChatInboxPage: React.FC = () => {
     if (!tgId) return;
     setAddingUser(true);
     try {
-      await verifyLogin(loginId, code);
+      await toast.promise(
+        verifyLogin(loginId, code),
+        {
+          loading: 'Verifying...',
+          success: 'User logged in',
+          error: 'Verification failed',
+        }
+      );
+
       const list = await listAvatars(tgId);
       try {
         localStorage.setItem('avatarIds', JSON.stringify(list));
@@ -421,9 +437,7 @@ const ChatInboxPage: React.FC = () => {
       setPhoneNumber('');
       setVerificationCode('');
       setLoginId('');
-      alert('User logged in');
-    } catch {
-      /* ignore */
+
     } finally {
       setAddingUser(false);
     }
