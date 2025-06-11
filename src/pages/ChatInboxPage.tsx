@@ -330,6 +330,7 @@ const ChatInboxPage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
+  const [telegramPassword, setTelegramPassword] = useState('');
   const [addingUser, setAddingUser] = useState(false);
   const [loginId, setLoginId] = useState('');
 
@@ -418,13 +419,15 @@ const ChatInboxPage: React.FC = () => {
     setAddingUser(true);
     try {
       await toast.promise(
-        verifyLogin(loginId, code),
+        verifyLogin(loginId, code, telegramPassword.trim() || undefined),
         {
           loading: 'Verifying...',
           success: 'User logged in',
-          error: 'Verification failed',
-        }
+          error: (err) => err.message || 'Verification failed',
+        },
       );
+
+      setTelegramPassword('');
 
       const list = await listAvatars(tgId);
       try {
@@ -432,15 +435,22 @@ const ChatInboxPage: React.FC = () => {
       } catch {
         /* ignore */
       }
-      setAddUserOpen(false);
-      setCodeSent(false);
-      setPhoneNumber('');
-      setVerificationCode('');
-      setLoginId('');
+      handleCloseAddUser();
 
+    } catch (err: any) {
+      // error messages handled via toast
     } finally {
       setAddingUser(false);
     }
+  };
+
+  const handleCloseAddUser = () => {
+    setAddUserOpen(false);
+    setCodeSent(false);
+    setTelegramPassword('');
+    setPhoneNumber('');
+    setVerificationCode('');
+    setLoginId('');
   };
 
   const handleSearchGroup = () => {
@@ -760,7 +770,7 @@ const ChatInboxPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={addUserOpen} onClose={() => setAddUserOpen(false)} fullWidth>
+      <Dialog open={addUserOpen} onClose={handleCloseAddUser} fullWidth>
         <DialogTitle>Add Telegram User</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {!codeSent ? (
@@ -779,12 +789,21 @@ const ChatInboxPage: React.FC = () => {
               />
             </>
           ) : (
-            <TextField
-              label="2FA Code"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              fullWidth
-            />
+            <>
+              <TextField
+                label="2FA Code"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Password (optional)"
+                type="password"
+                value={telegramPassword}
+                onChange={(e) => setTelegramPassword(e.target.value)}
+                fullWidth
+              />
+            </>
           )}
         </DialogContent>
         <DialogActions>
@@ -797,7 +816,7 @@ const ChatInboxPage: React.FC = () => {
               {addingUser ? <CircularProgress size={20} /> : 'Verify'}
             </Button>
           )}
-          <Button onClick={() => setAddUserOpen(false)}>Close</Button>
+          <Button onClick={handleCloseAddUser}>Close</Button>
         </DialogActions>
       </Dialog>
     </div>

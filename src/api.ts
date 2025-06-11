@@ -11,13 +11,28 @@ export async function startLogin(telegramId: string, phone: string): Promise<str
   return data.loginId as string;
 }
 
-export async function verifyLogin(loginId: string, code: string): Promise<string> {
+export async function verifyLogin(
+  loginId: string,
+  code: string,
+  password?: string,
+): Promise<string> {
+  const payload: any = { loginId, code };
+  if (password) payload.password = password;
+
   const resp = await fetch(`${BASE_URL}/api/avatars/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ loginId, code }),
+    body: JSON.stringify(payload),
   });
-  if (!resp.ok) throw new Error('Failed to verify login');
+
+  if (!resp.ok) {
+    try {
+      const err = await resp.json();
+      throw new Error(err.error || 'Failed to verify login');
+    } catch {
+      throw new Error('Failed to verify login');
+    }
+  }
   const data = await resp.json();
   return data.avatarId as string;
 }
