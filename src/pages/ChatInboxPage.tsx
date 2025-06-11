@@ -330,7 +330,7 @@ const ChatInboxPage: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [needPassword, setNeedPassword] = useState(false);
+
   const [telegramPassword, setTelegramPassword] = useState('');
   const [addingUser, setAddingUser] = useState(false);
   const [loginId, setLoginId] = useState('');
@@ -420,11 +420,8 @@ const ChatInboxPage: React.FC = () => {
     setAddingUser(true);
     try {
       await toast.promise(
-        verifyLogin(
-          loginId,
-          code,
-          needPassword ? telegramPassword.trim() || undefined : undefined,
-        ),
+        verifyLogin(loginId, code, telegramPassword.trim() || undefined),
+
         {
           loading: 'Verifying...',
           success: 'User logged in',
@@ -432,7 +429,7 @@ const ChatInboxPage: React.FC = () => {
         },
       );
 
-      setNeedPassword(false);
+
       setTelegramPassword('');
 
       const list = await listAvatars(tgId);
@@ -444,10 +441,7 @@ const ChatInboxPage: React.FC = () => {
       handleCloseAddUser();
 
     } catch (err: any) {
-      if (err.message === 'password required') {
-        setNeedPassword(true);
-        return;
-      }
+
     } finally {
       setAddingUser(false);
     }
@@ -456,7 +450,7 @@ const ChatInboxPage: React.FC = () => {
   const handleCloseAddUser = () => {
     setAddUserOpen(false);
     setCodeSent(false);
-    setNeedPassword(false);
+
     setTelegramPassword('');
     setPhoneNumber('');
     setVerificationCode('');
@@ -806,15 +800,14 @@ const ChatInboxPage: React.FC = () => {
                 onChange={(e) => setVerificationCode(e.target.value)}
                 fullWidth
               />
-              {needPassword && (
-                <TextField
-                  label="Password"
-                  type="password"
-                  value={telegramPassword}
-                  onChange={(e) => setTelegramPassword(e.target.value)}
-                  fullWidth
-                />
-              )}
+              <TextField
+                label="Password (optional)"
+                type="password"
+                value={telegramPassword}
+                onChange={(e) => setTelegramPassword(e.target.value)}
+                fullWidth
+              />
+
             </>
           )}
         </DialogContent>
