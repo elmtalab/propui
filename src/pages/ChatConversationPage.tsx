@@ -31,6 +31,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import LoadingOverlay from '../LoadingOverlay';
 
 import { Link, useParams } from 'react-router-dom';
 import { listAvatars, getAvatar } from '../api';
@@ -595,7 +596,9 @@ const handleInputChange = (
   })();
 
   return (
-    <div
+    <>
+      <LoadingOverlay open={generating} />
+      <div
       className="chat-container"
       style={{
         paddingBottom: 80,
@@ -1028,6 +1031,7 @@ const handleInputChange = (
 
 
     </div>
+    </>
   );
 };
 

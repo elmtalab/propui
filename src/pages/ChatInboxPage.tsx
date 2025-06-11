@@ -33,6 +33,7 @@ import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { startLogin, verifyLogin, listAvatars } from '../api';
 import { toast } from 'react-hot-toast';
+import LoadingOverlay from '../LoadingOverlay';
 
 
 
@@ -563,6 +564,7 @@ const ChatInboxPage: React.FC = () => {
 
   return (
     <>
+      <LoadingOverlay open={searching || addingUser} />
       <div className="chat-container" style={{ height: viewportHeight }}>
       <div className="inbox-header">
         <h2>Chats</h2>
