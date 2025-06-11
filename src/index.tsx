@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import 'react-chat-elements/dist/main.css';
 import App from './App';
-import { Toaster } from 'react-hot-toast';
 import reportWebVitals from './reportWebVitals';
 
 const tg = (window as any).Telegram?.WebApp;
@@ -25,7 +24,6 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <App />
-    <Toaster position="bottom-center" />
   </React.StrictMode>
 );
 
