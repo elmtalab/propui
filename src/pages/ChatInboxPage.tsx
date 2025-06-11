@@ -35,6 +35,7 @@ import { startLogin, verifyLogin, listAvatars } from '../api';
 import { toast } from 'react-hot-toast';
 
 
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -391,6 +392,7 @@ const ChatInboxPage: React.FC = () => {
       );
       setLoginId(id);
       setCodeSent(true);
+
     } finally {
       setAddingUser(false);
     }
@@ -423,6 +425,7 @@ const ChatInboxPage: React.FC = () => {
           error: 'Verification failed',
         }
       );
+
       const list = await listAvatars(tgId);
       try {
         localStorage.setItem('avatarIds', JSON.stringify(list));
@@ -434,6 +437,7 @@ const ChatInboxPage: React.FC = () => {
       setPhoneNumber('');
       setVerificationCode('');
       setLoginId('');
+
     } finally {
       setAddingUser(false);
     }
