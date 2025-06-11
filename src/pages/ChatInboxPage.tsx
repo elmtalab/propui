@@ -258,20 +258,33 @@ const ChatInboxPage: React.FC = () => {
     const lastMsg = lastConv.messages?.slice(-1)[0] || {};
 
     const id = g.groupId ?? g.id ?? '';
-    let candidate = g.title || g.name || g.username || '';
-    candidate = candidate.trim();
+    const details = userGroups.find(
+      (u) => String(u.id ?? u.groupId) === String(id)
+    ) || {};
+
+    let candidate =
+      details.title ||
+      details.name ||
+      details.username ||
+      g.title ||
+      g.name ||
+      g.username ||
+      '';
+
+    candidate = String(candidate).trim();
     if (candidate.startsWith('@')) candidate = candidate.slice(1);
     if (!candidate) {
-     candidate = `Group ${id}`;
-
+      candidate = `Group ${id}`;
     }
     const name = candidate;
+
+    const username = details.username || g.username;
 
     return {
       id,
       avatar: getGroupCoverUrl(
-        g.username
-          ? `${g.username.startsWith('@') ? g.username : '@' + g.username}`
+        username
+          ? `${username.startsWith('@') ? username : '@' + username}`
           : String(id)
       ),
 
