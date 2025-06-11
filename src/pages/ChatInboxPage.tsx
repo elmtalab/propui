@@ -223,12 +223,7 @@ const ChatInboxPage: React.FC = () => {
         const groups = Array.isArray(data.groups)
           ? data.groups.map((g: any) => g.group || g)
           : [];
-        const clean = groups.filter((g: any) => {
-          let name = (g.title || g.name || g.username || '').trim();
-          if (name.startsWith('@')) name = name.slice(1);
-          return name && !/^\d+$/.test(name);
-        });
-        setUserGroups(clean);
+        setUserGroups(groups);
       })
       .catch(() => setUserGroups([]));
   }, [tabIndex, userGroups.length]);
@@ -265,8 +260,8 @@ const ChatInboxPage: React.FC = () => {
     let candidate = g.title || g.name || g.username || '';
     candidate = candidate.trim();
     if (candidate.startsWith('@')) candidate = candidate.slice(1);
-    if (!candidate || /^\d+$/.test(candidate)) {
-      return null;
+    if (!candidate) {
+      candidate = `Group ${id}`;
     }
     const name = candidate;
 
@@ -286,10 +281,10 @@ const ChatInboxPage: React.FC = () => {
     };
   };
 
-  const executedChats = executedGroups.map(mapChat).filter(Boolean);
-  const scheduledChats = scheduledGroups.map(mapChat).filter(Boolean);
-  const draftChats = draftGroups.map(mapChat).filter(Boolean);
-  const groupChats = (userGroups.length ? userGroups : groups).map(mapChat).filter(Boolean);
+  const executedChats = executedGroups.map(mapChat);
+  const scheduledChats = scheduledGroups.map(mapChat);
+  const draftChats = draftGroups.map(mapChat);
+  const groupChats = (userGroups.length ? userGroups : groups).map(mapChat);
 
 
 
@@ -496,11 +491,6 @@ const ChatInboxPage: React.FC = () => {
       .then((data) => {
         const g = data?.group?.group;
         if (g && g.id) {
-          let name = (g.title || g.name || g.username || '').trim();
-          if (name.startsWith('@')) name = name.slice(1);
-          if (!name || /^\d+$/.test(name)) {
-            return;
-          }
           setGroups((prev) => {
             if (prev.some((pg) => pg.groupId === g.id)) return prev;
             return [...prev, { groupId: g.id, conversations: [] }];
