@@ -31,6 +31,8 @@ import AddIcon from '@mui/icons-material/Add';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import LoadingOverlay from '../LoadingOverlay';
 
 import { Link, useParams } from 'react-router-dom';
@@ -102,6 +104,10 @@ const ChatConversationPage: React.FC = () => {
   );
   const [delayMenuId, setDelayMenuId] = useState<number | null>(null);
   const [delayMenuPosition, setDelayMenuPosition] =
+    useState<{ x: number; y: number } | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
+  const [settingsPosition, setSettingsPosition] =
     useState<{ x: number; y: number } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -618,6 +624,7 @@ const handleInputChange = (
         setMenuPosition(null);
         setDelayMenuId(null);
         setDelayMenuPosition(null);
+        setSettingsOpen(false);
       }}
       
     >
