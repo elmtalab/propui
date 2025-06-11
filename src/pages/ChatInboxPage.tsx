@@ -223,7 +223,8 @@ const ChatInboxPage: React.FC = () => {
         const groups = Array.isArray(data.groups)
           ? data.groups.map((g: any) => g.group || g)
           : [];
-        setUserGroups(groups);
+       setUserGroups(groups);
+
       })
       .catch(() => setUserGroups([]));
   }, [tabIndex, userGroups.length]);
@@ -261,7 +262,8 @@ const ChatInboxPage: React.FC = () => {
     candidate = candidate.trim();
     if (candidate.startsWith('@')) candidate = candidate.slice(1);
     if (!candidate) {
-      candidate = `Group ${id}`;
+     candidate = `Group ${id}`;
+
     }
     const name = candidate;
 
@@ -491,6 +493,7 @@ const ChatInboxPage: React.FC = () => {
       .then((data) => {
         const g = data?.group?.group;
         if (g && g.id) {
+
           setGroups((prev) => {
             if (prev.some((pg) => pg.groupId === g.id)) return prev;
             return [...prev, { groupId: g.id, conversations: [] }];
