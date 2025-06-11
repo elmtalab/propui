@@ -34,7 +34,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import LoadingOverlay from '../LoadingOverlay';
 
 import { Link, useParams } from 'react-router-dom';
-import { listAvatars, getAvatar } from '../api';
+import { listAvatars, getAvatar, getGroupCoverUrl } from '../api';
 
 interface Avatar {
   id: string;
@@ -623,7 +623,7 @@ const handleInputChange = (
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
         <img
-          src={findAvatar(id ?? '').avatar}
+          src={getGroupCoverUrl(String(id))}
           className="header-avatar"
           alt={id}
         />

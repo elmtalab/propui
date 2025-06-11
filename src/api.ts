@@ -51,3 +51,7 @@ export async function getAvatar(avatarId: string): Promise<{ telegramId: string 
   return { telegramId: data.telegramId as string };
 
 }
+
+export function getGroupCoverUrl(groupId: string): string {
+  return `${BASE_URL}/api/group-cover?groupId=${encodeURIComponent(groupId)}`;
+}
