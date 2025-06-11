@@ -11,7 +11,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
@@ -147,10 +146,6 @@ const ChatInboxPage: React.FC = () => {
   const [groups, setGroups] = useState<any[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
   const [userGroups, setUserGroups] = useState<any[]>([]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const settingsBtnRef = useRef<HTMLButtonElement>(null);
-  const [settingsPosition, setSettingsPosition] =
-    useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     let tgId: number | null = null;
@@ -534,53 +529,6 @@ const ChatInboxPage: React.FC = () => {
       .finally(() => setSearching(false));
   };
 
-  const handleRefresh = () => {
-    setSettingsOpen(false);
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('draft-json-') || key.startsWith('group-cover-cache-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    localStorage.removeItem('conversations');
-
-    let tgId: number | null = null;
-    const tgStr = localStorage.getItem('tg_init_data');
-    if (tgStr) {
-      try {
-        tgId = JSON.parse(tgStr).user?.id ?? null;
-      } catch {
-        /* ignore */
-      }
-    }
-    if (!tgId) {
-      const tg = (window as any).Telegram?.WebApp;
-      tgId = tg?.initDataUnsafe?.user?.id ?? null;
-    }
-    if (!tgId) return;
-
-    fetch(
-      `https://prop-backend-worker.elmtalabx.workers.dev/api/user-conversations?telegramId=${tgId}`
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const convs = data.conversations || [];
-        const map: Record<string, any[]> = {};
-        convs.forEach((c: any) => {
-          if (!map[c.groupId]) map[c.groupId] = [];
-          map[c.groupId].push(c);
-        });
-        const remoteGroups = Object.keys(map).map((gid) => ({
-          groupId: gid,
-          conversations: map[gid],
-        }));
-        setGroups(remoteGroups);
-        localStorage.setItem('conversations', JSON.stringify(remoteGroups));
-      })
-      .catch(() => {
-        /* ignore */
-      });
-  };
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -642,39 +590,12 @@ const ChatInboxPage: React.FC = () => {
   return (
     <>
       <LoadingOverlay open={searching || addingUser} />
-      <div
-        className="chat-container"
-        style={{ height: viewportHeight }}
-        onClick={() => setSettingsOpen(false)}
-      >
+      <div className="chat-container" style={{ height: viewportHeight }}>
       <div className="inbox-header">
         <h2>Chats</h2>
-        <IconButton
-          ref={settingsBtnRef}
-          size="large"
-          className="settings-icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            const rect = settingsBtnRef.current?.getBoundingClientRect();
-            if (rect) {
-              setSettingsPosition({ x: rect.right, y: rect.bottom });
-            }
-            setSettingsOpen((o) => !o);
-          }}
-        >
+        <IconButton size="large" className="settings-icon">
           <SettingsIcon />
         </IconButton>
-        {settingsOpen && (
-          <div
-            className="message-menu"
-            style={{ left: settingsPosition?.x, top: settingsPosition?.y }}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <button onClick={handleRefresh}>
-              <RefreshIcon fontSize="small" /> Refresh
-            </button>
-          </div>
-        )}
       </div>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
