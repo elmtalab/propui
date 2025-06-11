@@ -44,3 +44,30 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Backend API
+
+### `GET /api/group-cover`
+
+Retrieves and caches a Telegram group's profile image. This route expects a
+`groupId` query parameter and returns the image in JPEG format. If the image is
+not already cached it is fetched from Telegram and stored for future requests.
+
+Sample request using the public worker:
+
+```http
+GET https://prop-backend-worker.elmtalabx.workers.dev/api/group-cover?groupId=123456
+```
+
+Sample successful response:
+
+```
+HTTP/1.1 200 OK
+Content-Type: image/jpeg
+ETag: "<etag-from-R2>"
+
+(binary JPEG data)
+```
+
+Possible error responses include `400` when `groupId` is missing and `404` when
+the group has no profile image.
