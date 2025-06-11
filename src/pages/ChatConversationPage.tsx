@@ -468,77 +468,7 @@ const handleSend = () => {
     setDelayMenuId(null);
   };
 
-  const handleRefresh = () => {
-    setSettingsOpen(false);
-    localStorage.removeItem(`draft-json-${id}`);
-    localStorage.removeItem(`group-cover-cache-${id}`);
-    try {
-      const stored = localStorage.getItem('conversations');
-      if (stored) {
-        const groups = JSON.parse(stored).filter((g: any) => g.groupId !== id);
-        localStorage.setItem('conversations', JSON.stringify(groups));
-      }
-    } catch {
-      localStorage.removeItem('conversations');
-    }
 
-    let tgId: number | null = null;
-    const tgStr = localStorage.getItem('tg_init_data');
-    if (tgStr) {
-      try {
-        tgId = JSON.parse(tgStr).user?.id ?? null;
-      } catch {
-        /* ignore */
-      }
-    }
-    if (!tgId) {
-      const tg = (window as any).Telegram?.WebApp;
-      tgId = tg?.initDataUnsafe?.user?.id ?? null;
-    }
-    if (!tgId) return;
-
-    fetch(`https://prop-backend-worker.elmtalabx.workers.dev/api/user-conversations?telegramId=${tgId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        const convs = data.conversations || [];
-        const map: Record<string, any[]> = {};
-        convs.forEach((c: any) => {
-          if (!map[c.groupId]) map[c.groupId] = [];
-          map[c.groupId].push(c);
-        });
-        const groups = Object.keys(map).map((gid) => ({
-          groupId: gid,
-          conversations: map[gid],
-        }));
-        localStorage.setItem('conversations', JSON.stringify(groups));
-        const g = groups.find((gr) => String(gr.groupId) === String(id));
-        if (g && g.conversations) {
-          const convList: Conversation[] = g.conversations.map((c: any) => ({
-            id: c.conversationId || c.id || uuidv4(),
-            startDateTime: new Date(c.createdAt || new Date()),
-            messages: (c.messages || []).map((m: any, idx: number) => {
-              const type = (c.type || '').toLowerCase();
-              let defaultStatus: string = 'draft';
-              if (type === 'executed') defaultStatus = 'executed';
-              else if (type === 'scheduled' || type === 'pending') defaultStatus = 'pending';
-              return {
-                id: idx + 1,
-                uuid: m.message_id || m.uuid || uuidv4(),
-                from: m.sender_id || m.from || '',
-                text: m.text || m.message_content || '',
-                delay: 0,
-                status: m.status || defaultStatus,
-              };
-            }),
-          }));
-          setConversations(convList.length ? convList : [{ id: uuidv4(), startDateTime: new Date(), messages: [] }]);
-          setConversationIndex(0);
-        }
-      })
-      .catch(() => {
-        /* ignore */
-      });
-  };
 
   const handleSchedule = () => {
     setGenerating(true);
@@ -721,32 +651,7 @@ const handleInputChange = (
           onChange={(d) => d && updateStartDateTime(d)}
           value={startDateTime}
         />
-        <IconButton
-          ref={settingsBtnRef}
-          size="large"
-          className="settings-icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            const rect = settingsBtnRef.current?.getBoundingClientRect();
-            if (rect) {
-              setSettingsPosition({ x: rect.right, y: rect.bottom });
-            }
-            setSettingsOpen((o) => !o);
-          }}
-        >
-          <SettingsIcon />
-        </IconButton>
-        {settingsOpen && (
-          <div
-            className="message-menu"
-            style={{ left: settingsPosition?.x, top: settingsPosition?.y }}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <button onClick={handleRefresh}>
-              <RefreshIcon fontSize="small" /> Refresh
-            </button>
-          </div>
-        )}
+
       </div>
       <div className="conversation-nav">
         <Pagination
