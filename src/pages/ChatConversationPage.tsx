@@ -699,26 +699,6 @@ const handleInputChange = (
 
       </div>
       <div
-        className="start-time-inputs"
-        style={{ display: 'flex', gap: 4, marginBottom: 8, alignItems: 'center' }}
-      >
-        <Button
-          className="generate-btn schedule-btn"
-          onClick={handleSchedule}
-          disabled={generating}
-
-        >
-          {generating ? (
-            <CircularProgress size={20} color="inherit" />
-          ) : (
-            <>
-              <AutoAwesomeIcon style={{ marginRight: 4 }} />
-              Schedule
-            </>
-          )}
-        </Button>
-      </div>
-      <div
         className={`chat-messages ${
           transitionDir ? `animate-${transitionDir}` : ''
         }`}
@@ -994,6 +974,7 @@ const handleInputChange = (
           onClick={() => setJsonOpen(true)}
           color="primary"
           aria-label="show-json"
+          style={{ display: 'none' }}
         >
           <CodeIcon />
         </IconButton>
@@ -1006,6 +987,22 @@ const handleInputChange = (
         >
           <SmartToyIcon />
         </IconButton>
+
+        <Button
+          className="generate-btn schedule-btn"
+          onClick={handleSchedule}
+          disabled={generating}
+          style={{ marginLeft: 4 }}
+        >
+          {generating ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            <>
+              <AutoAwesomeIcon style={{ marginRight: 4 }} />
+              Schedule
+            </>
+          )}
+        </Button>
 
         <IconButton
           className="send-button"
