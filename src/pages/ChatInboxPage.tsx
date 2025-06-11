@@ -269,7 +269,11 @@ const ChatInboxPage: React.FC = () => {
 
     return {
       id,
-      avatar: getGroupCoverUrl(String(id)),
+      avatar: getGroupCoverUrl(
+        g.username
+          ? `${g.username.startsWith('@') ? g.username : '@' + g.username}`
+          : String(id)
+      ),
 
       alt: name,
       title: name,

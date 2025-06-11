@@ -624,7 +624,15 @@ const handleInputChange = (
       <div className="chat-header">
         <Link to="/chat" className="back-icon">←</Link>
         <GroupAvatar
-          groupId={id ?? ''}
+          groupId={
+            groupInfo?.username
+              ? `${
+                  groupInfo.username.startsWith('@')
+                    ? groupInfo.username
+                    : '@' + groupInfo.username
+                }`
+              : String(id ?? '')
+          }
           className="header-avatar"
           alt={id}
         />
