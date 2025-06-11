@@ -52,6 +52,54 @@ export async function getAvatar(avatarId: string): Promise<{ telegramId: string 
 
 }
 
+const COVER_TTL = 168 * 60 * 60 * 1000; // 168 hours
+const COVER_PREFIX = 'group-cover-cache-';
+const pending: Record<string, Promise<void>> = {};
+
 export function getGroupCoverUrl(groupId: string): string {
+  if (typeof window !== 'undefined') {
+    const key = `${COVER_PREFIX}${groupId}`;
+    try {
+      const cached = JSON.parse(localStorage.getItem(key) || 'null');
+      if (cached && Date.now() - cached.ts < COVER_TTL && cached.data) {
+        return cached.data as string;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const url = `${BASE_URL}/api/group-cover?groupId=${encodeURIComponent(groupId)}`;
+
+    if (!pending[groupId]) {
+      pending[groupId] = fetch(url)
+        .then((res) => {
+          if (!res.ok) throw new Error('failed');
+          return res.blob();
+        })
+        .then((blob) =>
+          new Promise<string>((resolve) => {
+            const fr = new FileReader();
+            fr.onloadend = () => resolve(fr.result as string);
+            fr.readAsDataURL(blob);
+          })
+        )
+        .then((dataUrl) => {
+          try {
+            localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: dataUrl }));
+          } catch {
+            /* ignore */
+          }
+        })
+        .catch(() => {
+          /* ignore */
+        })
+        .finally(() => {
+          delete pending[groupId];
+        });
+    }
+
+    return url;
+  }
+
   return `${BASE_URL}/api/group-cover?groupId=${encodeURIComponent(groupId)}`;
 }

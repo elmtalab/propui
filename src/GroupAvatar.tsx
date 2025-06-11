@@ -9,7 +9,14 @@ interface GroupAvatarProps {
 
 const GroupAvatar: React.FC<GroupAvatarProps> = ({ groupId, className, alt }) => {
   const url = getGroupCoverUrl(String(groupId));
-  return <img src={url} className={className} alt={alt ?? String(groupId)} />;
+  return (
+    <img
+      src={url}
+      className={className}
+      style={{ borderRadius: '50%', objectFit: 'cover' }}
+      alt={alt ?? String(groupId)}
+    />
+  );
 };
 
 export default GroupAvatar;
