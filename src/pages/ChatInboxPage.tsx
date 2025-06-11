@@ -2,7 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { createPortal } from 'react-dom';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { ChatList } from 'react-chat-elements';
 import 'react-chat-elements/dist/main.css';
@@ -143,8 +143,11 @@ const mergeGroups = (remote: any[] = [], local: any[] = []) => {
 
 const ChatInboxPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = Number(searchParams.get('tab') ?? '0');
   const [groups, setGroups] = useState<any[]>([]);
-  const [tabIndex, setTabIndex] = useState(0);
+  const [tabIndex, setTabIndex] = useState(initialTab);
   const [userGroups, setUserGroups] = useState<any[]>([]);
 
   useEffect(() => {
