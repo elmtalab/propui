@@ -226,7 +226,7 @@ const ChatInboxPage: React.FC = () => {
         const clean = groups.filter((g: any) => {
           let name = (g.title || g.name || g.username || '').trim();
           if (name.startsWith('@')) name = name.slice(1);
-          return name && !/^\d+$/.test(name);
+          return !!name;
         });
         setUserGroups(clean);
       })
@@ -265,7 +265,7 @@ const ChatInboxPage: React.FC = () => {
     let candidate = g.title || g.name || g.username || '';
     candidate = candidate.trim();
     if (candidate.startsWith('@')) candidate = candidate.slice(1);
-    if (!candidate || /^\d+$/.test(candidate)) {
+    if (!candidate) {
       return null;
     }
     const name = candidate;
@@ -498,7 +498,7 @@ const ChatInboxPage: React.FC = () => {
         if (g && g.id) {
           let name = (g.title || g.name || g.username || '').trim();
           if (name.startsWith('@')) name = name.slice(1);
-          if (!name || /^\d+$/.test(name)) {
+          if (!name) {
             return;
           }
           setGroups((prev) => {
