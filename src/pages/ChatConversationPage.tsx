@@ -461,7 +461,6 @@ const handleSend = () => {
     updateMessages((prev) => prev.map((m) => (m.id === id ? { ...m, delay: 0 } : m)));
     setDelayMenuId(null);
   };
-
   const handleSchedule = () => {
     setGenerating(true);
     const conv = conversations[conversationIndex];
