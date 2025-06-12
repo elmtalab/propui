@@ -88,7 +88,7 @@ const HomePage: React.FC = () => {
             {JSON.stringify(initData, null, 2)}
           </pre>
         )}
-        <button onClick={() => navigate('/chat')}>Go to Chat</button>
+        <button onClick={() => navigate('/chat?tab=3')}>Go to Chat</button>
       </header>
     </div>
   );
