@@ -661,8 +661,15 @@ const handleInputChange = (
       '.header-datetime input'
     ) as NodeListOf<HTMLInputElement>;
     inputs.forEach((input) => {
-      input.readOnly = true;
-      input.setAttribute('inputmode', 'none');
+      if ((input as HTMLInputElement).hidden) return;
+      const name = input.getAttribute('name');
+      if (name === 'day' || name === 'month' || name === 'year') {
+        input.readOnly = true;
+        input.setAttribute('inputmode', 'none');
+      } else {
+        input.readOnly = false;
+        input.removeAttribute('inputmode');
+      }
     });
   }, []);
 
